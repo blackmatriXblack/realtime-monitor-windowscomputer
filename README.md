@@ -781,7 +781,7 @@ These are honest gaps in the current build.
 ## Project Layout
 
 ```
-webdnsviewer/
+realtime-monitor-windowscomputer/
 ├── rolling_log_monitor.py   # The entire application — 2,306 lines, no local imports
 ├── run_monitor.bat          # Convenience launcher: cd to script dir, run, pause
 └── README.md                # This file
