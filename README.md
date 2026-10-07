@@ -146,7 +146,7 @@ you pass through, and `pause`s at the end so the window stays open.
 ### Option 2 — Terminal
 
 ```powershell
-cd D:\goldensakurazero\webdnsviewer
+cd your location
 python rolling_log_monitor.py
 ```
 
@@ -158,7 +158,7 @@ the top event sources.
 Open **Windows Terminal / PowerShell as Administrator**, then:
 
 ```powershell
-cd D:\goldensakurazero\webdnsviewer
+cd your location
 python rolling_log_monitor.py --log monitor.log --interval 1.0
 ```
 
