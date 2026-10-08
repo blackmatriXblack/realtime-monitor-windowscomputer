@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "windows-monitor"
-version = "3.0.0"
+version = "4.0.0"
 description = "Comprehensive real-time Windows system monitoring with rolling log display"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.8"
 authors = [
-    {name = "Windows Monitor", email = "monitor@example.com"},
+    {name = "Windows Monitor", email = "zeroprojectapex@foxmail.com"},
 ]
 keywords = [
     "windows",
