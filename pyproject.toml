@@ -79,11 +79,11 @@ exe = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/windows-monitor"
-Documentation = "https://github.com/example/windows-monitor#readme"
-Repository = "https://github.com/example/windows-monitor"
-"Bug Tracker" = "https://github.com/example/windows-monitor/issues"
-"Changelog" = "https://github.com/example/windows-monitor/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/blackmatriXblack/realtime-monitor-windowscomputer"
+Documentation = "https://github.com/blackmatriXblack/realtime-monitor-windowscomputer"
+Repository = "https://github.com/blackmatriXblack/realtime-monitor-windowscomputer"
+"Bug Tracker" = "https://github.com/blackmatriXblack/realtime-monitor-windowscomputer"
+"Changelog" = "https://github.com/blackmatriXblack/realtime-monitor-windowscomputer"
 
 [project.scripts]
 windows-monitor = "windowsmonitor.__main__:main"
