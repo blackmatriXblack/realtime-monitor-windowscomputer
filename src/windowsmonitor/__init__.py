@@ -1,5 +1,5 @@
 """
-Windows Monitor - Comprehensive real-time Windows system monitoring package.
+Windows Monitor - Comprehensive real-time Windows system monitoring package
 """
 
 __version__ = "2.0.0"
@@ -17,7 +17,7 @@ from .__main__ import (
     DatedFolderLogger,
     CleanupThread,
     BaseMonitor,
-    SEV_NAME,
+    SEV_NAME
 )
 
 __all__ = [
@@ -31,6 +31,5 @@ __all__ = [
     "DatedFolderLogger",
     "CleanupThread",
     "BaseMonitor",
-    "SEV_NAME",
+    "SEV_NAME"
 ]
-
