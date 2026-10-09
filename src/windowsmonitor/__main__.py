@@ -555,7 +555,7 @@ class NetworkMonitor(BaseMonitor):
                 self._prev_conns = current
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception as e:
                 self.bus.publish(Event("NETWORK", "ERROR", str(e), severity=Severity.ERROR))
                 time.sleep(5.0)
@@ -599,7 +599,7 @@ class SystemMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception as e:
                 self.bus.publish(Event("SYSTEM", "ERROR", str(e), severity=Severity.ERROR))
                 time.sleep(5.0)
@@ -728,7 +728,7 @@ class EventLogMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(10.0)
 
@@ -821,7 +821,7 @@ class WmiMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(10.0)
 
@@ -1008,7 +1008,7 @@ class MemoryMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -1040,7 +1040,7 @@ class ModuleMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -1119,7 +1119,7 @@ class ClipboardMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -1157,7 +1157,7 @@ class InputMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -1233,7 +1233,7 @@ class IdleMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -1271,7 +1271,7 @@ class PowerMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(10.0)
 
@@ -1309,7 +1309,7 @@ class ThreatMonitor(BaseMonitor):
                 
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(10.0)
 
@@ -1602,7 +1602,7 @@ class ProcessTreeMonitor(BaseMonitor):
                 self._prev_trees = {k: [v] for k, v in current.items()}
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -1737,7 +1737,7 @@ class BatteryMonitor(BaseMonitor):
                     self._prev_status = status
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(10.0)
 
@@ -1768,7 +1768,7 @@ class TemperatureMonitor(BaseMonitor):
                             self._prev_status = temp
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(10.0)
 
@@ -1807,7 +1807,7 @@ class DiskHealthMonitor(BaseMonitor):
                         pass
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(10.0)
 
@@ -1835,7 +1835,7 @@ class CpuCoreMonitor(BaseMonitor):
                 self._prev_usage = usage
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -1871,7 +1871,7 @@ class NetworkBandwidthMonitor(BaseMonitor):
                     self._prev_stats = (sent, recv)
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -1908,7 +1908,7 @@ class ProcessResourceMonitor(BaseMonitor):
                 self._prev_procs = {p['pid']: p for p in procs[:5]}
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -2641,7 +2641,7 @@ class ThermalZoneMonitor(BaseMonitor):
                         self._prev_zones[zone] = temp
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(10.0)
 
@@ -3257,7 +3257,7 @@ class ProcessCreationMonitor(BaseMonitor):
                 self._prev_pids = current
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -3288,7 +3288,7 @@ class ProcessTerminationMonitor(BaseMonitor):
                 self._prev_pids = current
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -3324,7 +3324,7 @@ class NewConnectionMonitor(BaseMonitor):
                 self._prev_conns = current
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -4632,7 +4632,7 @@ class PerfMon(BaseMonitor):
                     self._prev_counters[name] = val
                 time.sleep(self.interval)
             except ImportError:
-                break
+                return
             except Exception:
                 time.sleep(5.0)
 
@@ -4723,113 +4723,15 @@ class HelloMonitor(BaseMonitor):
 # ============================================================
 # Windows Sandbox Monitor
 # ============================================================
-class SandboxMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("SANDBOX", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Sandbox | Select-Object State"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                status = result.stdout.strip()
-                if status and status != self._prev_status:
-                    self.bus.publish(Event("SANDBOX", "STATUS",
-                                           f"Sandbox: {status}",
-                                           severity=Severity.INFO,
-                                           data={"status": status}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # WSL Monitor
 # ============================================================
-class WSLMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("WSL", bus, interval)
-        self._prev_distros: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["wsl", "--list", "--verbose"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for distro in current - self._prev_distros:
-                    self.bus.publish(Event("WSL", "DISTRO",
-                                           f"WSL: {distro[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"distro": distro[:200]}))
-                self._prev_distros = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Docker Monitor
 # ============================================================
-class DockerMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("DOCKER", bus, interval)
-        self._prev_containers: Set[str] = set()
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["docker", "ps", "-a", "--format", "{{.ID}} {{.Names}} {{.Status}}"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for container in current - self._prev_containers:
-                    self.bus.publish(Event("DOCKER", "CONTAINER",
-                                           f"Docker: {container[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"container": container[:200]}))
-                self._prev_containers = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Hyper-V Monitor
 # ============================================================
-class HyperVMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("HYPERV", bus, interval)
-        self._prev_vms: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-VM | Select-Object Name, State, Uptime"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for vm in current - self._prev_vms:
-                    self.bus.publish(Event("HYPERV", "VM",
-                                           f"Hyper-V: {vm[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"vm": vm[:200]}))
-                self._prev_vms = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Update Log Monitor
 # ============================================================
@@ -4862,490 +4764,54 @@ class WULogMonitor(BaseMonitor):
 # ============================================================
 # SetupAPI Log Monitor
 # ============================================================
-class SetupAPIMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("SETUPAPI", bus, interval)
-        self._prev_lines: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        log_path = os.environ.get("WINDIR", "C:\\Windows") + "\\inf\\setupapi.log"
-        while not self._stop.is_set():
-            try:
-                if os.path.exists(log_path):
-                    with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        lines = f.readlines()
-                    current = set(lines[-50:])
-                    for line in current - self._prev_lines:
-                        if line.strip():
-                            self.bus.publish(Event("SETUPAPI", "DEVICE",
-                                                   f"SetupAPI: {line.strip()[:100]}",
-                                                   severity=Severity.INFO,
-                                                   data={"line": line.strip()[:200]}))
-                    self._prev_lines = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Crypto Key Monitor
 # ============================================================
-class CryptoKeyMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("CRYPTO", bus, interval)
-        self._prev_keys: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-ChildItem Cert:\\LocalMachine\\My | Select-Object Thumbprint, Subject"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for key in current - self._prev_keys:
-                    self.bus.publish(Event("CRYPTO", "KEY",
-                                           f"Crypto key: {key[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"key": key[:200]}))
-                self._prev_keys = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Feature Update Monitor
 # ============================================================
-class FeatureUpdateMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 120.0):
-        super().__init__("FEATUPDATE", bus, interval)
-        self._prev_updates: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-HotFix | Where-Object {$_.InstalledOn -gt (Get-Date).AddDays(-1)} | Select-Object HotFixID, InstalledOn, InstalledBy"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set(result.stdout.splitlines())
-                for update in current - self._prev_updates:
-                    self.bus.publish(Event("FEATUPDATE", "INSTALLED",
-                                           f"Update: {update[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"update": update[:200]}))
-                self._prev_updates = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # AppLocker Monitor
 # ============================================================
-class AppLockerMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("APPLOCKER", bus, interval)
-        self._prev_events: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-WinEvent -MaxEvents 10 -FilterHashtable @{LogName='Microsoft-Windows-AppLocker/EXE and DLL'} | Select-Object Id, Message"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set(result.stdout.splitlines())
-                for event in current - self._prev_events:
-                    self.bus.publish(Event("APPLOCKER", "EVENT",
-                                           f"AppLocker: {event[:100]}",
-                                           severity=Severity.WARNING,
-                                           data={"event": event[:200]}))
-                self._prev_events = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Defender Behavior Monitor
 # ============================================================
-class DefenderBehaviorMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("DEF_BEHAV", bus, interval)
-        self._prev_threats: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-MpThreat | Select-Object ThreatName, IsActive, DidThreatExecute, SeverityID"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for threat in current - self._prev_threats:
-                    self.bus.publish(Event("DEF_BEHAV", "THREAT",
-                                           f"Defender threat: {threat[:100]}",
-                                           severity=Severity.WARNING,
-                                           data={"threat": threat[:200]}))
-                self._prev_threats = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Network Profile Monitor
 # ============================================================
-class NetworkProfileMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("NETPROF", bus, interval)
-        self._prev_profiles: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-NetConnectionProfile | Select-Object Name, InterfaceAlias, NetworkCategory, IPv4Connectivity"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for profile in current - self._prev_profiles:
-                    self.bus.publish(Event("NETPROF", "CHANGE",
-                                           f"Network profile: {profile[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"profile": profile[:200]}))
-                self._prev_profiles = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # DnsClientCache Monitor
 # ============================================================
-class DnsCacheMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 10.0):
-        super().__init__("DNS_CACHE", bus, interval)
-        self._prev_entries: Dict[str, str] = {}
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-DnsClientCache | Select-Object Entry, Data, TimeToLive"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = {}
-                for line in result.stdout.splitlines():
-                    if line.strip() and not line.startswith("Entry"):
-                        parts = line.split()
-                        if parts:
-                            entry = parts[0]
-                            data = parts[1] if len(parts) > 1 else ""
-                            current[entry] = data
-                            if entry not in self._prev_entries:
-                                self.bus.publish(Event("DNS_CACHE", "CACHED",
-                                                       f"DNS cache: {entry} -> {data}",
-                                                       severity=Severity.DEBUG,
-                                                       data={"entry": entry, "data": data}))
-                self._prev_entries = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Hosts File Monitor
 # ============================================================
-class HostsFileMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 10.0):
-        super().__init__("HOSTS", bus, interval)
-        self._prev_hash = None
-        self.hosts_path = os.environ.get("WINDIR", "C:\\Windows") + "\\System32\\drivers\\etc\\hosts"
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                if os.path.exists(self.hosts_path):
-                    import hashlib
-                    with open(self.hosts_path, 'rb') as f:
-                        h = hashlib.md5(f.read()).hexdigest()
-                    if h != self._prev_hash:
-                        with open(self.hosts_path, 'r', encoding='utf-8', errors='ignore') as f:
-                            lines = f.readlines()
-                        entries = [l.strip() for l in lines if l.strip() and not l.startswith("#")]
-                        self.bus.publish(Event("HOSTS", "CHANGED",
-                                               f"Hosts file changed ({len(entries)} entries)",
-                                               severity=Severity.WARNING,
-                                               data={"path": self.hosts_path,
-                                                     "entries": entries[:20],
-                                                     "total_entries": len(entries)}))
-                        self._prev_hash = h
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Proxy Settings Monitor
 # ============================================================
-class ProxyMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("PROXY", bus, interval)
-        self._prev_proxy = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' | Select-Object ProxyEnable, ProxyServer, AutoConfigURL"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                proxy = result.stdout.strip()
-                if proxy and proxy != self._prev_proxy:
-                    self.bus.publish(Event("PROXY", "CHANGE",
-                                           f"Proxy: {proxy}",
-                                           severity=Severity.INFO,
-                                           data={"proxy": proxy}))
-                    self._prev_proxy = proxy
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Autopilot Monitor
 # ============================================================
-class AutopilotMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("AUTOPILOT", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-ItemProperty -Path HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Autopilot -Name *"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                status = result.stdout.strip()
-                if status and status != self._prev_status:
-                    self.bus.publish(Event("AUTOPILOT", "STATUS",
-                                           f"Autopilot: {status[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"status": status[:200]}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Sandbox Monitor
 # ============================================================
-class SandboxMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("SANDBOX", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Sandbox | Select-Object State"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                status = result.stdout.strip()
-                if status and status != self._prev_status:
-                    self.bus.publish(Event("SANDBOX", "STATUS",
-                                           f"Sandbox: {status}",
-                                           severity=Severity.INFO,
-                                           data={"status": status}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # WSL Monitor
 # ============================================================
-class WSLMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("WSL", bus, interval)
-        self._prev_distros: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["wsl", "--list", "--verbose"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for distro in current - self._prev_distros:
-                    self.bus.publish(Event("WSL", "DISTRO",
-                                           f"WSL: {distro[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"distro": distro[:200]}))
-                self._prev_distros = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Docker Monitor
 # ============================================================
-class DockerMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("DOCKER", bus, interval)
-        self._prev_containers: Set[str] = set()
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["docker", "ps", "-a", "--format", "{{.ID}} {{.Names}} {{.Status}}"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for container in current - self._prev_containers:
-                    self.bus.publish(Event("DOCKER", "CONTAINER",
-                                           f"Docker: {container[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"container": container[:200]}))
-                self._prev_containers = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Hyper-V Monitor
 # ============================================================
-class HyperVMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("HYPERV", bus, interval)
-        self._prev_vms: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-VM | Select-Object Name, State, Uptime"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for vm in current - self._prev_vms:
-                    self.bus.publish(Event("HYPERV", "VM",
-                                           f"Hyper-V: {vm[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"vm": vm[:200]}))
-                self._prev_vms = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Update Log Monitor
 # ============================================================
-class WULogMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("WU_LOG", bus, interval)
-        self._prev_lines: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        log_path = os.environ.get("WINDIR", "C:\\Windows") + "\\Logs\\WindowsUpdate\\WindowsUpdate.log"
-        while not self._stop.is_set():
-            try:
-                if os.path.exists(log_path):
-                    with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        lines = f.readlines()
-                    current = set(lines[-100:])
-                    for line in current - self._prev_lines:
-                        if line.strip():
-                            self.bus.publish(Event("WU_LOG", "UPDATE",
-                                                   f"WU: {line.strip()[:100]}",
-                                                   severity=Severity.DEBUG,
-                                                   data={"line": line.strip()[:200]}))
-                    self._prev_lines = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # SetupAPI Log Monitor
 # ============================================================
-class SetupAPIMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("SETUPAPI", bus, interval)
-        self._prev_lines: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        log_path = os.environ.get("WINDIR", "C:\\Windows") + "\\inf\\setupapi.log"
-        while not self._stop.is_set():
-            try:
-                if os.path.exists(log_path):
-                    with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        lines = f.readlines()
-                    current = set(lines[-50:])
-                    for line in current - self._prev_lines:
-                        if line.strip():
-                            self.bus.publish(Event("SETUPAPI", "DEVICE",
-                                                   f"SetupAPI: {line.strip()[:100]}",
-                                                   severity=Severity.INFO,
-                                                   data={"line": line.strip()[:200]}))
-                    self._prev_lines = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Crypto Key Monitor
 # ============================================================
-class CryptoKeyMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("CRYPTO", bus, interval)
-        self._prev_keys: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-ChildItem Cert:\\LocalMachine\\My | Select-Object Thumbprint, Subject"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for key in current - self._prev_keys:
-                    self.bus.publish(Event("CRYPTO", "KEY",
-                                           f"Crypto key: {key[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"key": key[:200]}))
-                self._prev_keys = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Performance Recorder Monitor
 # ============================================================
@@ -5435,1078 +4901,108 @@ class ResetMonitor(BaseMonitor):
 # ============================================================
 # Windows Hello Monitor
 # ============================================================
-class HelloMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("HELLO", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-BitLockerVolume -MountPoint C: | Select-Object ProtectionStatus, KeyProtector"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                status = result.stdout.strip()
-                if status and status != self._prev_status:
-                    self.bus.publish(Event("HELLO", "STATUS",
-                                           f"BitLocker/Hello: {status}",
-                                           severity=Severity.INFO,
-                                           data={"status": status}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Event Log Channel Monitor
 # ============================================================
-class EventLogChannelMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0, channels: List[str] = None):
-        super().__init__("EVENTLOG_CH", bus, interval)
-        self.channels = channels or ["System", "Application", "Security", "Setup", "ForwardedEvents"]
-        self._prev_counts: Dict[str, int] = {}
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                for channel in self.channels:
-                    try:
-                        result = subprocess.run(
-                            ["wevtutil", "qe", channel, "/c", "1", "/f", "text"],
-                            capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                        )
-                        count = len(result.stdout.splitlines())
-                        prev = self._prev_counts.get(channel, 0)
-                        if count > prev:
-                            self.bus.publish(Event("EVENTLOG_CH", "NEW",
-                                                   f"Channel {channel}: {count - prev} new events",
-                                                   severity=Severity.INFO,
-                                                   data={"channel": channel, "new_count": count - prev}))
-                        self._prev_counts[channel] = count
-                    except Exception:
-                        pass
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Performance Counter Monitor
 # ============================================================
-class PerformanceCounterMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 10.0):
-        super().__init__("PERF", bus, interval)
-        self._prev_values: Dict[str, float] = {}
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                counters = {
-                    "CPU": "\\Processor(_Total)\\% Processor Time",
-                    "MEMORY": "\\Memory\\Available MBytes",
-                    "DISK_READ": "\\PhysicalDisk(_Total)\\Disk Read Bytes/sec",
-                    "DISK_WRITE": "\\PhysicalDisk(_Total)\\Disk Write Bytes/sec",
-                    "NET_SENT": "\\Network Interface(*)\\Bytes Sent/sec",
-                    "NET_RECV": "\\Network Interface(*)\\Bytes Received/sec",
-                }
-                try:
-                    import psutil
-                    cpu = psutil.cpu_percent(interval=1)
-                    mem = psutil.virtual_memory()
-                    disk = psutil.disk_io_counters()
-                    net = psutil.net_io_counters()
-                    
-                    values = {
-                        "CPU": cpu,
-                        "MEMORY": mem.available / 1024 / 1024,
-                        "DISK_READ": disk.read_bytes if disk else 0,
-                        "DISK_WRITE": disk.write_bytes if disk else 0,
-                        "NET_SENT": net.bytes_sent if net else 0,
-                        "NET_RECV": net.bytes_recv if net else 0,
-                    }
-                    
-                    for name, val in values.items():
-                        prev = self._prev_values.get(name)
-                        if prev is not None and abs(val - prev) > 1:
-                            self.bus.publish(Event("PERF", "COUNTER",
-                                                   f"{name}: {val:.1f}",
-                                                   severity=Severity.DEBUG,
-                                                   data={"counter": name, "value": val}))
-                        self._prev_values[name] = val
-                except ImportError:
-                    pass
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Update Monitor
 # ============================================================
-class WindowsUpdateMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("WUPDATE", bus, interval)
-        self._prev_updates: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-HotFix | Select-Object -ExpandProperty HotFixID"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set(result.stdout.splitlines())
-                for update in current - self._prev_updates:
-                    self.bus.publish(Event("WUPDATE", "INSTALLED",
-                                           f"Update installed: {update}",
-                                           severity=Severity.INFO,
-                                           data={"update_id": update}))
-                self._prev_updates = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Installed Software Monitor
 # ============================================================
-class InstalledSoftwareMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 120.0):
-        super().__init__("SOFTWARE", bus, interval)
-        self._prev_software: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-ItemProperty HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\* | Select-Object DisplayName, DisplayVersion"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set()
-                for line in result.stdout.splitlines():
-                    if line.strip():
-                        current.add(line.strip())
-                for sw in current - self._prev_software:
-                    self.bus.publish(Event("SOFTWARE", "CHANGE",
-                                           f"Software: {sw}",
-                                           severity=Severity.INFO,
-                                           data={"software": sw}))
-                self._prev_software = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Features Monitor
 # ============================================================
-class WindowsFeaturesMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 120.0):
-        super().__init__("WINFEAT", bus, interval)
-        self._prev_features: Dict[str, str] = {}
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-WindowsFeature | Select-Object Name, InstallState"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = {}
-                for line in result.stdout.splitlines():
-                    if line.strip() and not line.startswith("Name"):
-                        parts = line.split()
-                        if len(parts) >= 2:
-                            current[parts[0]] = parts[1]
-                            if parts[0] not in self._prev_features:
-                                self.bus.publish(Event("WINFEAT", "STATE",
-                                                       f"Feature {parts[0]}: {parts[1]}",
-                                                       severity=Severity.INFO,
-                                                       data={"feature": parts[0], "state": parts[1]}))
-                self._prev_features = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Network Adapter Monitor
 # ============================================================
-class NetworkAdapterMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 15.0):
-        super().__init__("NETADAPTER", bus, interval)
-        self._prev_adapters: Dict[str, str] = {}
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-NetAdapter | Select-Object Name, Status, LinkSpeed"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = {}
-                for line in result.stdout.splitlines():
-                    if line.strip() and not line.startswith("Name"):
-                        parts = line.split()
-                        if len(parts) >= 2:
-                            name = parts[0]
-                            status = parts[1]
-                            current[name] = status
-                            if name not in self._prev_adapters:
-                                self.bus.publish(Event("NETADAPTER", "CHANGE",
-                                                       f"Adapter {name}: {status}",
-                                                       severity=Severity.INFO,
-                                                       data={"adapter": name, "status": status}))
-                self._prev_adapters = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # TCP Statistics Monitor
 # ============================================================
-class TCPStatsMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 15.0):
-        super().__init__("TCPSTATS", bus, interval)
-        self._prev_stats: Optional[Dict[str, int]] = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["netstat", "-s"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                stats = {}
-                for line in result.stdout.splitlines():
-                    if "segments" in line.lower() or "connections" in line.lower():
-                        parts = line.split()
-                        if parts:
-                            try:
-                                stats[line.strip()] = int(parts[-1])
-                            except ValueError:
-                                pass
-                if self._prev_stats:
-                    for key, val in stats.items():
-                        prev = self._prev_stats.get(key, 0)
-                        if val != prev:
-                            self.bus.publish(Event("TCPSTATS", "CHANGE",
-                                                   f"{key}: {prev} -> {val}",
-                                                   severity=Severity.DEBUG,
-                                                   data={"stat": key, "old": prev, "new": val}))
-                self._prev_stats = stats
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # UAC Monitor
 # ============================================================
-class UACMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("UAC", bus, interval)
-        self._prev_level = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-ItemProperty -Path HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorLevel"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                level = None
-                for line in result.stdout.splitlines():
-                    if "ConsentPromptBehaviorLevel" in line:
-                        parts = line.split()
-                        if parts:
-                            level = parts[-1]
-                if level is not None and level != self._prev_level:
-                    self.bus.publish(Event("UAC", "CHANGE",
-                                           f"UAC level changed: {self._prev_level} -> {level}",
-                                           severity=Severity.WARNING,
-                                           data={"old_level": self._prev_level, "new_level": level}))
-                    self._prev_level = level
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # SmartScreen Monitor
 # ============================================================
-class SmartScreenMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("SMARTSCREEN", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-MpPreference | Select-Object -ExpandProperty SmartScreenEnabled"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                status = result.stdout.strip()
-                if status and status != self._prev_status:
-                    self.bus.publish(Event("SMARTSCREEN", "STATUS",
-                                           f"SmartScreen: {status}",
-                                           severity=Severity.INFO,
-                                           data={"status": status}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Credential Manager Monitor
 # ============================================================
-class CredentialMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("CRED", bus, interval)
-        self._prev_creds: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["cmdkey", "/list"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set()
-                for line in result.stdout.splitlines():
-                    if "Target:" in line:
-                        current.add(line.strip())
-                        if line.strip() not in self._prev_creds:
-                            self.bus.publish(Event("CRED", "ADDED",
-                                                   f"Credential: {line.strip()}",
-                                                   severity=Severity.INFO,
-                                                   data={"target": line.strip()}))
-                for cred in self._prev_creds - current:
-                    self.bus.publish(Event("CRED", "REMOVED",
-                                           f"Credential removed: {cred}",
-                                           severity=Severity.INFO,
-                                           data={"target": cred}))
-                self._prev_creds = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Error Reporting Monitor
 # ============================================================
-class WERMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("WER", bus, interval)
-        self._prev_reports: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-WERReport | Select-Object -ExpandProperty ReportID"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set(result.stdout.splitlines())
-                for report in current - self._prev_reports:
-                    self.bus.publish(Event("WER", "REPORT",
-                                           f"Error report: {report}",
-                                           severity=Severity.WARNING,
-                                           data={"report_id": report}))
-                self._prev_reports = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Dump File Monitor
 # ============================================================
-class DumpFileMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0, paths: List[str] = None):
-        super().__init__("DUMP", bus, interval)
-        self.paths = paths or [
-            os.environ.get("WINDIR", "C:\\Windows") + "\\Minidump",
-            os.environ.get("WINDIR", "C:\\Windows") + "\\MEMORY.DMP",
-        ]
-        self._prev_sizes: Dict[str, int] = {}
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                for path in self.paths:
-                    try:
-                        p = Path(path)
-                        if not p.exists():
-                            continue
-                        if p.is_file():
-                            size = p.stat().st_size
-                            prev = self._prev_sizes.get(path, 0)
-                            if size != prev:
-                                self.bus.publish(Event("DUMP", "CHANGE",
-                                                       f"Dump file {p.name}: {prev} -> {size}",
-                                                       severity=Severity.WARNING,
-                                                       data={"path": str(p), "old_size": prev, "new_size": size}))
-                                self._prev_sizes[path] = size
-                        elif p.is_dir():
-                            files = list(p.glob("*.dmp"))
-                            for f in files:
-                                size = f.stat().st_size
-                                key = str(f)
-                                prev = self._prev_sizes.get(key, 0)
-                                if size != prev:
-                                    self.bus.publish(Event("DUMP", "CHANGE",
-                                                           f"Dump {f.name}: {prev} -> {size}",
-                                                           severity=Severity.WARNING,
-                                                           data={"path": str(f), "old_size": prev, "new_size": size}))
-                                    self._prev_sizes[key] = size
-                    except Exception:
-                        pass
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Pagefile Monitor
 # ============================================================
-class PagefileMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("PAGEFILE", bus, interval)
-        self._prev_usage: Optional[float] = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-CimInstance Win32_PageFileUsage | Select-Object Name, CurrentUsage, AllocatedBaseSize"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                for line in result.stdout.splitlines():
-                    if line.strip() and not line.startswith("Name"):
-                        parts = line.split()
-                        if len(parts) >= 3:
-                            name = parts[0]
-                            usage = int(parts[1])
-                            total = int(parts[2])
-                            percent = (usage / total * 100) if total > 0 else 0
-                            if self._prev_usage is not None and abs(percent - self._prev_usage) > 5:
-                                self.bus.publish(Event("PAGEFILE", "USAGE",
-                                                       f"Pagefile {name}: {percent:.1f}%",
-                                                       severity=Severity.INFO if percent < 80 else Severity.WARNING,
-                                                       data={"name": name, "usage": usage, "total": total, "percent": percent}))
-                            self._prev_usage = percent
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Hibernation Monitor
 # ============================================================
-class HibernationMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("HIBER", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powercfg", "/a"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                status = "enabled" if "Hibernate" in result.stdout and "Not available" not in result.stdout else "disabled"
-                if status != self._prev_status:
-                    self.bus.publish(Event("HIBER", "STATUS",
-                                           f"Hibernation: {status}",
-                                           severity=Severity.INFO,
-                                           data={"status": status}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Fan Speed Monitor
 # ============================================================
-class FanSpeedMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 20.0):
-        super().__init__("FAN", bus, interval)
-        self._prev_speed: Dict[str, int] = {}
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                import psutil
-                temps = psutil.sensors_temperatures()
-                fans = psutil.sensors_fans()
-                if fans:
-                    for name, entries in fans.items():
-                        for entry in entries:
-                            speed = entry.current
-                            key = f"{name}_{entry.label or 'fan'}"
-                            prev = self._prev_speed.get(key)
-                            if prev is not None and speed != prev:
-                                self.bus.publish(Event("FAN", "SPEED",
-                                                       f"{key}: {prev} -> {speed} RPM",
-                                                       severity=Severity.DEBUG,
-                                                       data={"sensor": key, "old_speed": prev, "new_speed": speed}))
-                            self._prev_speed[key] = speed
-                time.sleep(self.interval)
-            except (ImportError, AttributeError):
-                break
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Thermal Zone Monitor
 # ============================================================
-class ThermalZoneMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 15.0):
-        super().__init__("THERMAL", bus, interval)
-        self._prev_zones: Dict[str, float] = {}
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                import psutil
-                temps = psutil.sensors_temperatures()
-                for name, entries in temps.items():
-                    for entry in entries:
-                        temp = entry.current
-                        zone = f"{name}_{entry.label or 'thermal'}"
-                        prev = self._prev_zones.get(zone)
-                        if prev is not None and abs(temp - prev) > 2:
-                            sev = Severity.INFO if temp < 70 else (Severity.WARNING if temp < 90 else Severity.ERROR)
-                            self.bus.publish(Event("THERMAL", "TEMP",
-                                                   f"{zone}: {temp}C",
-                                                   severity=sev,
-                                                   data={"zone": zone, "temp": temp}))
-                        self._prev_zones[zone] = temp
-                time.sleep(self.interval)
-            except ImportError:
-                break
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # GPU Stats Monitor
 # ============================================================
-class GPUStatsMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 10.0):
-        super().__init__("GPU", bus, interval)
-        self._prev_usage: Optional[float] = None
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-CimInstance Win32_VideoController | Select-Object Name, AdapterRAM, DriverVersion"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                for line in result.stdout.splitlines():
-                    if line.strip() and not line.startswith("Name"):
-                        self.bus.publish(Event("GPU", "INFO",
-                                               f"GPU: {line.strip()}",
-                                               severity=Severity.DEBUG,
-                                               data={"info": line.strip()}))
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Hello Monitor
 # ============================================================
-class HelloMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("HELLO", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-BitLockerVolume -MountPoint C: | Select-Object ProtectionStatus, KeyProtector"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                status = result.stdout.strip()
-                if status and status != self._prev_status:
-                    self.bus.publish(Event("HELLO", "STATUS",
-                                           f"BitLocker/Hello: {status}",
-                                           severity=Severity.INFO,
-                                           data={"status": status}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Lock Screen Monitor
 # ============================================================
-class LockScreenMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 10.0):
-        super().__init__("LOCK", bus, interval)
-        self._prev_locked = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "$ts = [TimeZoneInfo]::Local; $ts.IsDaylightSavingTime([DateTime]::Now)"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                is_locked = result.stdout.strip()
-                if is_locked != self._prev_locked:
-                    self.bus.publish(Event("LOCK", "STATUS",
-                                           f"Lock status: {is_locked}",
-                                           severity=Severity.DEBUG,
-                                           data={"locked": is_locked}))
-                    self._prev_locked = is_locked
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Screen Saver Monitor
 # ============================================================
-class ScreenSaverMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 15.0):
-        super().__init__("SCRSAVER", bus, interval)
-        self._prev_active = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "(Get-ItemProperty -Path HKCU:\\Control Panel\\Desktop -Name ScreenSaveActive).ScreenSaveActive"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                active = result.stdout.strip()
-                if active != self._prev_active:
-                    self.bus.publish(Event("SCRSAVER", "STATUS",
-                                           f"Screensaver: {active}",
-                                           severity=Severity.DEBUG,
-                                           data={"active": active}))
-                    self._prev_active = active
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Logon Monitor
 # ============================================================
-class LogonMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("LOGON", bus, interval)
-        self._prev_events: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-WinEvent -MaxEvents 10 -FilterHashtable @{LogName='Security'; Id=4624} | Select-Object -ExpandProperty Message"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set(result.stdout.splitlines())
-                for event in current - self._prev_events:
-                    self.bus.publish(Event("LOGON", "LOGIN",
-                                           f"Logon: {event[:100]}",
-                                           severity=Severity.INFO,
-                                           data={"event": event[:200]}))
-                self._prev_events = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Defender Exclusions Monitor
 # ============================================================
-class DefenderExclusionsMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("DEF_EXCL", bus, interval)
-        self._prev_exclusions: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-MpPreference | Select-Object -ExpandProperty ExclusionPath"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for excl in current - self._prev_exclusions:
-                    self.bus.publish(Event("DEF_EXCL", "ADDED",
-                                           f"Defender exclusion: {excl}",
-                                           severity=Severity.WARNING,
-                                           data={"path": excl}))
-                self._prev_exclusions = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Defender Scan Monitor
 # ============================================================
-class DefenderScanMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 120.0):
-        super().__init__("DEF_SCAN", bus, interval)
-        self._prev_scan_id = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-MpComputerStatus | Select-Object QuickScanStartTime, FullScanStartTime"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                scan_id = result.stdout.strip()
-                if scan_id and scan_id != self._prev_scan_id:
-                    self.bus.publish(Event("DEF_SCAN", "SCAN",
-                                           f"Defender scan: {scan_id}",
-                                           severity=Severity.INFO,
-                                           data={"scan": scan_id}))
-                    self._prev_scan_id = scan_id
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Firewall Rules Monitor
 # ============================================================
-class FirewallRulesMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("FW_RULES", bus, interval)
-        self._prev_rules: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-NetFirewallRule | Select-Object DisplayName, Direction, Action, Enabled"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set(result.stdout.splitlines())
-                for rule in current - self._prev_rules:
-                    self.bus.publish(Event("FW_RULES", "CHANGE",
-                                           f"Firewall rule: {rule}",
-                                           severity=Severity.INFO,
-                                           data={"rule": rule}))
-                self._prev_rules = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Scheduled Task Execution Monitor
 # ============================================================
-class TaskExecutionMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("TASK_EXEC", bus, interval)
-        self._prev_tasks: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-ScheduledTask | Where-Object {$_.State -eq 'Running'} | Select-Object TaskName, State"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set(result.stdout.splitlines())
-                for task in current - self._prev_tasks:
-                    self.bus.publish(Event("TASK_EXEC", "START",
-                                           f"Task started: {task}",
-                                           severity=Severity.INFO,
-                                           data={"task": task}))
-                self._prev_tasks = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Time Zone Monitor
 # ============================================================
-class TimeZoneMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("TZ", bus, interval)
-        self._prev_tz = None
-    
-    def _run(self):
-        while not self._stop.is_set():
-            try:
-                import time
-                tz = time.tzname
-                if tz != self._prev_tz:
-                    self.bus.publish(Event("TZ", "CHANGE",
-                                           f"Timezone changed: {self._prev_tz} -> {tz}",
-                                           severity=Severity.WARNING,
-                                           data={"old": str(self._prev_tz), "new": str(tz)}))
-                    self._prev_tz = tz
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Display Settings Monitor
 # ============================================================
-class DisplaySettingsMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("DISPLAY", bus, interval)
-        self._prev_settings: Dict[str, str] = {}
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-CimInstance Win32_VideoController | Select-Object CurrentHorizontalResolution, CurrentVerticalResolution, CurrentRefreshRate"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                for line in result.stdout.splitlines():
-                    if line.strip() and not line.startswith("Current"):
-                        parts = line.split()
-                        if parts:
-                            setting = line.strip()
-                            if setting != self._prev_settings.get(parts[0]):
-                                self.bus.publish(Event("DISPLAY", "CHANGE",
-                                                       f"Display: {setting}",
-                                                       severity=Severity.INFO,
-                                                       data={"setting": setting}))
-                                self._prev_settings[parts[0]] = setting
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Audio Monitor
 # ============================================================
-class AudioMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 20.0):
-        super().__init__("AUDIO", bus, interval)
-        self._prev_devices: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-AudioDevice -List | Select-Object Name, Type"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for device in current - self._prev_devices:
-                    self.bus.publish(Event("AUDIO", "DEVICE",
-                                           f"Audio device: {device}",
-                                           severity=Severity.INFO,
-                                           data={"device": device}))
-                self._prev_devices = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Bluetooth Monitor
 # ============================================================
-class BluetoothMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("BT", bus, interval)
-        self._prev_devices: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-BluetoothDevice | Select-Object Name, ConnectionStatus"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for device in current - self._prev_devices:
-                    self.bus.publish(Event("BT", "DEVICE",
-                                           f"Bluetooth: {device}",
-                                           severity=Severity.INFO,
-                                           data={"device": device}))
-                self._prev_devices = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # USB Device Detail Monitor
 # ============================================================
-class USBDeviceDetailMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 30.0):
-        super().__init__("USB_DETAIL", bus, interval)
-        self._prev_devices: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-PnpDevice -Class USB | Select-Object FriendlyName, Status, InstanceId"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                current = set(result.stdout.splitlines())
-                for device in current - self._prev_devices:
-                    self.bus.publish(Event("USB_DETAIL", "DEVICE",
-                                           f"USB: {device}",
-                                           severity=Severity.INFO,
-                                           data={"device": device}))
-                self._prev_devices = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Boot Configuration Monitor
 # ============================================================
-class BootConfigMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 120.0):
-        super().__init__("BOOT", bus, interval)
-        self._prev_config = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["bcdedit", "/enum"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
-                )
-                config = result.stdout.strip()
-                if config != self._prev_config:
-                    self.bus.publish(Event("BOOT", "CONFIG",
-                                           f"Boot config changed",
-                                           severity=Severity.WARNING,
-                                           data={"config": config[:200]}))
-                    self._prev_config = config
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # TPM and BitLocker Monitor
 # ============================================================
-class TPMBitLockerMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 60.0):
-        super().__init__("TPM_BL", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-Tpm | Select-Object TpmReady, TpmEnabled; Get-BitLockerVolume -MountPoint C: | Select-Object ProtectionStatus"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                status = result.stdout.strip()
-                if status and status != self._prev_status:
-                    self.bus.publish(Event("TPM_BL", "STATUS",
-                                           f"TPM/BitLocker: {status}",
-                                           severity=Severity.INFO,
-                                           data={"status": status}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Store Apps Monitor
 # ============================================================
-class WindowsStoreAppsMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 120.0):
-        super().__init__("STORE_APPS", bus, interval)
-        self._prev_apps: Set[str] = set()
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-AppxPackage | Select-Object Name, PackageFullName"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                current = set(result.stdout.splitlines())
-                for app in current - self._prev_apps:
-                    self.bus.publish(Event("STORE_APPS", "CHANGE",
-                                           f"App: {app}",
-                                           severity=Severity.DEBUG,
-                                           data={"app": app}))
-                self._prev_apps = current
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Windows Recovery Monitor
 # ============================================================
-class WindowsRecoveryMonitor(BaseMonitor):
-    def __init__(self, bus: EventBus, interval: float = 120.0):
-        super().__init__("RECOVERY", bus, interval)
-        self._prev_status = None
-    
-    def _run(self):
-        if sys.platform != "win32":
-            return
-        while not self._stop.is_set():
-            try:
-                result = subprocess.run(
-                    ["powershell", "-Command", "Get-ComputerInfo | Select-Object WindowsREStatus, RecoveryEnvironment"],
-                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
-                )
-                status = result.stdout.strip()
-                if status and status != self._prev_status:
-                    self.bus.publish(Event("RECOVERY", "STATUS",
-                                           f"Recovery: {status}",
-                                           severity=Severity.INFO,
-                                           data={"status": status}))
-                    self._prev_status = status
-                time.sleep(self.interval)
-            except Exception:
-                time.sleep(10.0)
-
 # ============================================================
 # Rolling Log Display
 # ============================================================
@@ -7468,12 +5964,35 @@ Features:
         p.add_argument("--no-wu-log", action="store_true", help="Disable Windows Update log monitor")
         p.add_argument("--no-setupapi", action="store_true", help="Disable SetupAPI monitor")
         p.add_argument("--no-crypto", action="store_true", help="Disable crypto key monitor")
+
+        p.add_argument("--no-threat-adv", action="store_true", help="Disable advanced threat detection monitor")
+        p.add_argument("--no-kdriver", action="store_true", help="Disable kernel driver monitor")
+        p.add_argument("--no-net-analysis", action="store_true", help="Disable network traffic analysis monitor")
+        p.add_argument("--no-proc-integrity", action="store_true", help="Disable process integrity monitor")
+        p.add_argument("--no-reg-integrity", action="store_true", help="Disable registry integrity monitor")
+        p.add_argument("--no-file-integrity", action="store_true", help="Disable file integrity monitor")
+        p.add_argument("--no-cred-monitor", action="store_true", help="Disable credential monitoring monitor")
+        p.add_argument("--no-cloud", action="store_true", help="Disable cloud services monitor")
+        p.add_argument("--no-container", action="store_true", help="Disable container runtime monitor")
+        p.add_argument("--no-sys-integrity", action="store_true", help="Disable system integrity monitor")
+        p.add_argument("--no-audit", action="store_true", help="Disable audit policy monitor")
+        p.add_argument("--no-sec-compliance", action="store_true", help="Disable security compliance monitor")
+        p.add_argument("--no-net-adv", action="store_true", help="Disable advanced networking monitor")
+        p.add_argument("--no-perf-ext", action="store_true", help="Disable extended performance counter monitor")
+        p.add_argument("--no-service-ext", action="store_true", help="Disable extended service monitor")
+        p.add_argument("--no-hw-ext", action="store_true", help="Disable extended hardware health monitor")
+        p.add_argument("--no-power-ext", action="store_true", help="Disable extended power management monitor")
+        p.add_argument("--no-usb-ext", action="store_true", help="Disable extended USB device tracking monitor")
+        p.add_argument("--no-task-ext", action="store_true", help="Disable extended scheduled task monitor")
+        p.add_argument("--no-event-fwd", action="store_true", help="Disable event log forwarding monitor")
+        p.add_argument("--no-sec-log", action="store_true", help="Disable security logging monitor")
+        p.add_argument("--no-defender-atp", action="store_true", help="Disable Defender ATP monitor")
+
         p.add_argument("--log-dir", type=Path, default=Path("D:/RollingLogMonitor"), help="Log directory")
         p.add_argument("--no-dated-folders", action="store_true", help="Disable dated folder structure")
         p.add_argument("--cleanup-days", type=int, default=30, help="Days to keep logs")
         p.add_argument("--auto-start", action="store_true", help="Add to startup")
         p.add_argument("--build-exe", action="store_true", help="Build EXE with PyInstaller")
-        p.add_argument("--no-cloud", action="store_true", help="Disable cloud sync monitor")
         p.add_argument("--no-wac", action="store_true", help="Disable Windows Admin Center monitor")
         p.add_argument("--no-iis", action="store_true", help="Disable IIS monitor")
         p.add_argument("--no-sql", action="store_true", help="Disable SQL Server monitor")
@@ -7988,6 +6507,53 @@ Features:
         if not self.args.no_reset:
             monitors.append(ResetMonitor(self.bus, max(interval * 60, 120.0)))
         
+
+        # Extended monitors
+        if not self.args.no_threat_adv:
+            monitors.append(AdvancedThreatMonitor(self.bus, max(interval * 15, 30.0)))
+        if not self.args.no_kdriver:
+            monitors.append(KernelDriverMonitor(self.bus, max(interval * 30, 60.0)))
+        if not self.args.no_net_analysis:
+            monitors.append(NetworkTrafficAnalysisMonitor(self.bus, max(interval * 5, 10.0)))
+        if not self.args.no_proc_integrity:
+            monitors.append(ProcessIntegrityMonitor(self.bus, max(interval * 2.5, 5.0)))
+        if not self.args.no_reg_integrity:
+            monitors.append(RegistryIntegrityMonitor(self.bus, max(interval * 15, 30.0)))
+        if not self.args.no_file_integrity:
+            monitors.append(FileIntegrityMonitor(self.bus, max(interval * 30, 60.0)))
+        if not self.args.no_cred_monitor:
+            monitors.append(CredentialMonitor(self.bus, max(interval * 20, 45.0)))
+        if not self.args.no_cloud:
+            monitors.append(CloudServicesMonitor(self.bus, max(interval * 30, 60.0)))
+        if not self.args.no_container:
+            monitors.append(ContainerRuntimeMonitor(self.bus, max(interval * 15, 30.0)))
+        if not self.args.no_sys_integrity:
+            monitors.append(SystemIntegrityMonitor(self.bus, max(interval * 60, 120.0)))
+        if not self.args.no_audit:
+            monitors.append(AuditPolicyMonitor(self.bus, max(interval * 45, 90.0)))
+        if not self.args.no_sec_compliance:
+            monitors.append(SecurityComplianceMonitor(self.bus, max(interval * 60, 180.0)))
+        if not self.args.no_net_adv:
+            monitors.append(AdvancedNetworkingMonitor(self.bus, max(interval * 7.5, 15.0)))
+        if not self.args.no_perf_ext:
+            monitors.append(ExtendedPerformanceMonitor(self.bus, max(interval * 5, 10.0)))
+        if not self.args.no_service_ext:
+            monitors.append(ExtendedServiceMonitor(self.bus, max(interval * 30, 60.0)))
+        if not self.args.no_hw_ext:
+            monitors.append(ExtendedHardwareMonitor(self.bus, max(interval * 22.5, 45.0)))
+        if not self.args.no_power_ext:
+            monitors.append(ExtendedPowerMonitor(self.bus, max(interval * 15, 30.0)))
+        if not self.args.no_usb_ext:
+            monitors.append(ExtendedUSBMonitor(self.bus, max(interval * 10, 20.0)))
+        if not self.args.no_task_ext:
+            monitors.append(ExtendedTaskMonitor(self.bus, max(interval * 45, 90.0)))
+        if not self.args.no_event_fwd:
+            monitors.append(EventForwardingMonitor(self.bus, max(interval * 60, 120.0)))
+        if not self.args.no_sec_log:
+            monitors.append(SecurityLoggingMonitor(self.bus, max(interval * 10, 20.0)))
+        if not self.args.no_defender_atp:
+            monitors.append(DefenderATPMonitor(self.bus, max(interval * 30, 60.0)))
+
         return monitors
     
     def run(self):
@@ -8149,6 +6715,1170 @@ Features:
         if self.log_dir:
             print(f"Log directory: {self.log_dir}")
             print(f"Cleanup: {self.args.cleanup_days} days")
+
+
+# ============================================================
+# Advanced Threat Detection Monitor
+# ============================================================
+class AdvancedThreatMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 30.0):
+        super().__init__("THREAT_ADV", bus, interval)
+        self._suspicious_patterns: Dict[str, List[str]] = {
+            'network': ['reverse_shell', 'meterpreter', 'cobalt_strike', 'mimikatz'],
+            'process': ['powershell', 'cmd', 'wmic', 'psexec', 'psexec'],
+            'registry': ['RunOnce', 'Run=', 'CurrentVersion\\Run'],
+            'file': ['temp\\*', '*.tmp', 'appdata\\local\\temp\\*']
+        }
+        self._detected_threats: Set[str] = set()
+    
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                # Advanced threat detection using ETW and event logs
+                result = subprocess.run(
+                    ["powershell", "-Command", 
+                     "Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4688,4689,4624,4625,4670} -MaxEvents 50 | "
+                     "Select-Object -ExpandProperty Message"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=30
+                )
+                
+                for line in result.stdout.splitlines():
+                    for category, patterns in self._suspicious_patterns.items():
+                        for pattern in patterns:
+                            if pattern.lower() in line.lower():
+                                threat_id = f"{category}:{pattern}:{hashlib.md5(line.encode()).hexdigest()[:8]}"
+                                if threat_id not in self._detected_threats:
+                                    self._detected_threats.add(threat_id)
+                                    self.bus.publish(Event(
+                                        "THREAT_ADV", "DETECTION",
+                                        f"Suspicious activity detected: {pattern} in {category}",
+                                        severity=Severity.WARNING,
+                                        data={"pattern": pattern, "category": category,
+                                              "event": line[:100]}
+                                    ))
+                
+                time.sleep(self.interval)
+            except Exception as e:
+                self.bus.publish(Event("THREAT_ADV", "ERROR", str(e), severity=Severity.ERROR))
+                time.sleep(10.0)
+
+
+# ============================================================
+# Kernel Driver Monitor
+# ============================================================
+class KernelDriverMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 60.0):
+        super().__init__("K_DRIVER", bus, interval)
+        self._prev_drivers: Set[str] = set()
+        
+        # Known legitimate drivers that should be whitelisted
+        self._whitelist = {
+            'hal.dll', 'ntoskrnl.exe', 'kdcom.dll', 'mcupdate.dll',
+            'halmacpi.dll', 'halacpi.dll', 'diskdump.sys', 'storport.sys',
+            'classpnp.sys', 'partmgr.sys', 'volmgr.sys', 'volsnap.sys',
+            'fltmgr.sys', 'winlogon.sys', 'cdd.sys', 'dxgkrnl.sys'
+        }
+    
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command", 
+                     "Get-WinEvent -FilterHashtable @{LogName='System'; ID=7045} -MaxEvents 20 | "
+                     "Where-Object { $_.Message -match 'driver' } | Select-Object -ExpandProperty Message"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
+                )
+                
+                current_drivers = set()
+                for line in result.stdout.splitlines():
+                    if line.strip():
+                        driver = line.strip()
+                        current_drivers.add(driver)
+                        driver_name = driver.split('\\')[-1].lower() if '\\' in driver else driver.lower()
+                        
+                        if driver_name not in self._whitelist:
+                            self.bus.publish(Event(
+                                "K_DRIVER", "NEW_DRIVER",
+                                f"New kernel driver detected: {driver_name}",
+                                severity=Severity.WARNING,
+                                data={"driver": driver_name, "path": driver[:200]}
+                            ))
+                
+                new_drivers = current_drivers - self._prev_drivers
+                for driver in new_drivers:
+                    driver_name = driver.split('\\')[-1].lower() if '\\' in driver else driver.lower()
+                    if driver_name not in self._whitelist:
+                        self.bus.publish(Event(
+                            "K_DRIVER", "ALERT",
+                            f"Unknown kernel driver loaded: {driver_name}",
+                            severity=Severity.CRITICAL,
+                            data={"driver": driver_name, "path": driver[:200]}
+                        ))
+                
+                self._prev_drivers = current_drivers
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(15.0)
+
+
+# ============================================================
+# Network Traffic Analysis Monitor
+# ============================================================
+class NetworkTrafficAnalysisMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 10.0):
+        super().__init__("NET_ANALYSIS", bus, interval)
+        self._prev_connections: Set[str] = set()
+        self._suspicious_ports = {4444, 1337, 31337, 9987, 5555, 7777, 8888, 9999}
+        self._suspicious_ips = {'127.0.0.1'}
+        
+    def _run(self):
+        while not self._stop.is_set():
+            try:
+                import psutil
+                current_connections = set()
+                
+                for conn in psutil.net_connections(kind='inet'):
+                    try:
+                        if conn.laddr:
+                            local_addr = f"{conn.laddr.ip}:{conn.laddr.port}"
+                            current_connections.add(local_addr)
+                            
+                            # Check for suspicious ports
+                            if conn.laddr.port in self._suspicious_ports:
+                                self.bus.publish(Event(
+                                    "NET_ANALYSIS", "SUSPICIOUS_PORT",
+                                    f"Suspicious port detected: {conn.laddr.port}",
+                                    severity=Severity.WARNING,
+                                    data={"port": conn.laddr.port, "status": conn.status,
+                                          "pid": conn.pid if conn.pid else 0}
+                                ))
+                            
+                            # Check for suspicious IPs
+                            if conn.laddr.ip in self._suspicious_ips and conn.laddr.port != 135:
+                                if conn.laddr.port not in (80, 443, 53, 22):
+                                    self.bus.publish(Event(
+                                        "NET_ANALYSIS", "SUSPICIOUS_IP",
+                                        f"Suspicious connection to {conn.laddr.ip}:{conn.laddr.port}",
+                                        severity=Severity.WARNING,
+                                        data={"ip": conn.laddr.ip, "port": conn.laddr.port,
+                                              "status": conn.status}
+                                    ))
+                        
+                        # Check for established connections to unknown remote hosts
+                        if conn.status == 'ESTABLISHED' and conn.raddr:
+                            remote_addr = f"{conn.raddr.ip}:{conn.raddr.port}"
+                            if remote_addr not in self._prev_connections:
+                                self.bus.publish(Event(
+                                    "NET_ANALYSIS", "NEW_CONNECTION",
+                                    f"New external connection: {conn.raddr.ip}:{conn.raddr.port} [{conn.status}]",
+                                    severity=Severity.DEBUG,
+                                    data={"remote_ip": conn.raddr.ip,
+                                          "remote_port": conn.raddr.port,
+                                          "local": local_addr,
+                                          "pid": conn.pid if conn.pid else 0}
+                                ))
+                    except Exception:
+                        pass
+                
+                new_conns = current_connections - self._prev_connections
+                for conn in new_conns[:10]:
+                    self.bus.publish(Event(
+                        "NET_ANALYSIS", "CONNECTION",
+                        f"New network connection: {conn}",
+                        severity=Severity.DEBUG,
+                        data={"connection": conn}
+                    ))
+                
+                self._prev_connections = current_connections
+                time.sleep(self.interval)
+            except ImportError:
+                break
+            except Exception as e:
+                self.bus.publish(Event("NET_ANALYSIS", "ERROR", str(e), severity=Severity.ERROR))
+                time.sleep(10.0)
+
+
+# ============================================================
+# Process Integrity Monitor
+# ============================================================
+class ProcessIntegrityMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 5.0):
+        super().__init__("PROC_INTEGRITY", bus, interval)
+        self._proc_hashes: Dict[int, str] = {}  # PID -> hash of process info
+        self._suspicious_processes = {
+            'mimikatz', 'procdump', 'psexec', 'smbexec', 'wmic',
+            'powershell', 'cmd', 'rundll32', 'regsvr32', 'mshta',
+            'wscript', 'cscript', 'wmic', 'nslookup', 'netsh'
+        }
+        
+    def _run(self):
+        try:
+            import psutil
+            while not self._stop.is_set():
+                try:
+                    current_procs = {}
+                    for proc in psutil.process_iter(['pid', 'name', 'exe', 'cmdline', 'username']):
+                        try:
+                            info = proc.info
+                            current_procs[info['pid']] = {
+                                'name': info['name'],
+                                'exe': info['exe'] or '',
+                                'cmdline': ' '.join(info['cmdline'] or []),
+                                'username': info['username'] or ''
+                            }
+                            
+                            # Check for suspicious processes
+                            name_lower = info['name'].lower() if info['name'] else ''
+                            cmdline_lower = ' '.join(info['cmdline'] or []).lower()
+                            
+                            for suspicious in self._suspicious_processes:
+                                if suspicious in name_lower or suspicious in cmdline_lower:
+                                    proc_hash = f"{info['pid']}:{info['name']}"
+                                    if proc_hash not in self._proc_hashes:
+                                        self.bus.publish(Event(
+                                            "PROC_INTEGRITY", "SUSPICIOUS",
+                                            f"Suspicious process detected: {info['name']} (PID {info['pid']})",
+                                            severity=Severity.WARNING,
+                                            data={"pid": info['pid'],
+                                                  "name": info['name'],
+                                                  "cmdline": info['cmdline'][:200],
+                                                  "user": info['username']}
+                                        ))
+                                        self._proc_hashes[proc_hash] = str(info['pid'])
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            pass
+                    
+                    time.sleep(self.interval)
+                except Exception as e:
+                    self.bus.publish(Event("PROC_INTEGRITY", "ERROR", str(e), severity=Severity.ERROR))
+                    time.sleep(5.0)
+        except ImportError:
+            self.bus.publish(Event("PROC_INTEGRITY", "ERROR", "psutil not available", severity=Severity.WARNING))
+
+
+# ============================================================
+# Registry Integrity Monitor
+# ============================================================
+class RegistryIntegrityMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 30.0):
+        super().__init__("REG_INTEGRITY", bus, interval)
+        self._registry_hashes: Dict[str, str] = {}
+        self._critical_keys = [
+            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
+            r"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce",
+            r"SYSTEM\CurrentControlSet\Services",
+            r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon",
+            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
+            r"SOFTWARE\Classes\exefile\shell\open\command",
+            r"SOFTWARE\Classes\batfile\shell\open\command",
+        ]
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                import winreg
+                for key_path in self._critical_keys:
+                    try:
+                        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0, winreg.KEY_READ)
+                        values = []
+                        try:
+                            i = 0
+                            while True:
+                                try:
+                                    name, value, _ = winreg.EnumValue(key, i)
+                                    values.append(f"{name}={value}")
+                                    i += 1
+                                except OSError:
+                                    break
+                        except Exception:
+                            pass
+                        winreg.CloseKey(key)
+                        
+                        current_hash = hashlib.md5('|'.join(sorted(values)).encode()).hexdigest()
+                        if key_path in self._registry_hashes:
+                            if self._registry_hashes[key_path] != current_hash:
+                                self.bus.publish(Event(
+                                    "REG_INTEGRITY", "CHANGE",
+                                    f"Registry modification detected in {key_path}",
+                                    severity=Severity.CRITICAL,
+                                    data={"key": key_path,
+                                          "old_hash": self._registry_hashes[key_path],
+                                          "new_hash": current_hash}
+                                ))
+                        self._registry_hashes[key_path] = current_hash
+                    except Exception:
+                        pass
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# File Integrity Monitor
+# ============================================================
+class FileIntegrityMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 60.0):
+        super().__init__("FILE_INTEGRITY", bus, interval)
+        self._file_hashes: Dict[str, str] = {}
+        self._critical_files = [
+            'C:\\Windows\\System32\\drivers\\etc\\hosts',
+            'C:\\Windows\\win.ini',
+            'C:\\Windows\\system32\\cmd.exe',
+            'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+            'C:\\Windows\\System32\\wbem\\wmic.exe',
+        ]
+        
+    def _run(self):
+        while not self._stop.is_set():
+            try:
+                for file_path in self._critical_files:
+                    try:
+                        p = Path(file_path)
+                        if p.exists():
+                            with open(p, 'rb') as f:
+                                file_hash = hashlib.md5(f.read()).hexdigest()
+                            
+                            if file_path in self._file_hashes:
+                                if self._file_hashes[file_path] != file_hash:
+                                    self.bus.publish(Event(
+                                        "FILE_INTEGRITY", "MODIFIED",
+                                        f"Critical file modified: {file_path}",
+                                        severity=Severity.CRITICAL,
+                                        data={"file": file_path,
+                                              "old_hash": self._file_hashes[file_path],
+                                              "new_hash": file_hash}
+                                    ))
+                            else:
+                                self.bus.publish(Event(
+                                    "FILE_INTEGRITY", "INITIALIZED",
+                                    f"File integrity baseline: {file_path}",
+                                    severity=Severity.INFO,
+                                    data={"file": file_path, "hash": file_hash}
+                                ))
+                            
+                            self._file_hashes[file_path] = file_hash
+                    except Exception:
+                        pass
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# Credential Monitoring Monitor
+# ============================================================
+# ============================================================
+# Cloud Services Monitor
+# ============================================================
+class CloudServicesMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 60.0):
+        super().__init__("CLOUD", bus, interval)
+        self._known_processes: Set[str] = set()
+        self._cloud_processes = {
+            'onedrive.exe', 'googledrivesync.exe', 'dropbox.exe',
+            'icloud.exe', 'box.exe', 'sync.exe', 'resilio sync.exe'
+        }
+        
+    def _run(self):
+        while not self._stop.is_set():
+            try:
+                import psutil
+                current_processes = set()
+                
+                for proc in psutil.process_iter(['name']):
+                    try:
+                        proc_name = proc.info['name'].lower()
+                        current_processes.add(proc_name)
+                        
+                        if proc_name in self._cloud_processes:
+                            if proc_name not in self._known_processes:
+                                self.bus.publish(Event(
+                                    "CLOUD", "SERVICE_STARTED",
+                                    f"Cloud service detected: {proc_name}",
+                                    severity=Severity.INFO,
+                                    data={"process": proc_name}
+                                ))
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+                
+                new_procs = current_processes - self._known_processes
+                for proc in new_procs:
+                    if proc in self._cloud_processes:
+                        self.bus.publish(Event(
+                            "CLOUD", "SERVICE_RUNNING",
+                            f"Cloud service running: {proc}",
+                            severity=Severity.DEBUG,
+                            data={"process": proc}
+                        ))
+                
+                self._known_processes = current_processes
+                time.sleep(self.interval)
+            except ImportError:
+                return
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# Container Runtime Monitor
+# ============================================================
+class ContainerRuntimeMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 30.0):
+        super().__init__("CONTAINER", bus, interval)
+        self._running_containers: Set[str] = set()
+        
+    def _run(self):
+        while not self._stop.is_set():
+            try:
+                # Check for Docker
+                result = subprocess.run(
+                    ["docker", "ps", "-a", "--format", "{{.Names}}"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
+                )
+                
+                if result.returncode == 0:
+                    current_containers = set(line.strip() for line in result.stdout.splitlines() if line.strip())
+                    new_containers = current_containers - self._running_containers
+                    
+                    for container in new_containers:
+                        self.bus.publish(Event(
+                            "CONTAINER", "CONTAINER_START",
+                            f"Container started: {container}",
+                            severity=Severity.INFO,
+                            data={"container": container}
+                        ))
+                    
+                    stopped = self._running_containers - current_containers
+                    for container in stopped:
+                        self.bus.publish(Event(
+                            "CONTAINER", "CONTAINER_STOP",
+                            f"Container stopped: {container}",
+                            severity=Severity.NOTICE,
+                            data={"container": container}
+                        ))
+                    
+                    self._running_containers = current_containers
+                
+                # Check for WSL processes
+                if sys.platform == "win32":
+                    for proc in psutil.process_iter(['name']):
+                        try:
+                            if 'wsl' in proc.info['name'].lower():
+                                if proc.info['name'] not in self._running_containers:
+                                    self.bus.publish(Event(
+                                        "CONTAINER", "WSL_ACTIVE",
+                                        f"WSL process detected: {proc.info['name']}",
+                                        severity=Severity.DEBUG,
+                                        data={"process": proc.info['name']}
+                                    ))
+                                    self._running_containers.add(proc.info['name'])
+                        except Exception:
+                            pass
+                
+                time.sleep(self.interval)
+            except FileNotFoundError:
+                time.sleep(60.0)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# System Integrity Monitor
+# ============================================================
+class SystemIntegrityMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 120.0):
+        super().__init__("SYS_INTEGRITY", bus, interval)
+        self._baseline_files = []
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                # Check Secure Boot status
+                result = subprocess.run(
+                    ["powershell", "-Command", "Confirm-SecureBootIntegrity"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
+                )
+                
+                if result.returncode != 0:
+                    self.bus.publish(Event(
+                        "SYS_INTEGRITY", "SECURE_BOOT",
+                        "Secure Boot check returned non-zero status",
+                        severity=Severity.ERROR,
+                        data={"code": result.returncode}
+                    ))
+                
+                # Check Windows Defender Application Control
+                try:
+                    import winreg
+                    key = winreg.OpenKey(
+                        winreg.HKEY_LOCAL_MACHINE,
+                        r"SYSTEM\CurrentControlSet\Control\DeviceGuard",
+                        0, winreg.KEY_READ
+                    )
+                    i = 0
+                    while True:
+                        try:
+                            name, value, _ = winreg.EnumValue(key, i)
+                            if "EnableVirtualizationBasedSecurity" in name:
+                                if value == 0:
+                                    self.bus.publish(Event(
+                                        "SYS_INTEGRITY", "DEVICE_GUARD",
+                                        "Device Guard is disabled",
+                                        severity=Severity.WARNING,
+                                        data={"key": name, "value": int(value)}
+                                    ))
+                            i += 1
+                        except OSError:
+                            break
+                    winreg.CloseKey(key)
+                except Exception:
+                    pass
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(60.0)
+
+
+# ============================================================
+# Audit Policy Monitor
+# ============================================================
+class AuditPolicyMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 90.0):
+        super().__init__("AUDIT", bus, interval)
+        self._prev_policies: Dict[str, str] = {}
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["auditpol", "/get", "/category:*"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
+                )
+                
+                current_policies = {}
+                for line in result.stdout.splitlines():
+                    if line.strip() and ('Audit' in line or 'Success' in line or 'Failure' in line):
+                        parts = line.strip().split()
+                        if len(parts) >= 3:
+                            policy = ' '.join(parts[:-2])
+                            status = ' '.join(parts[-2:])
+                            current_policies[policy] = status
+                
+                for policy, status in current_policies.items():
+                    if policy not in self._prev_policies:
+                        self.bus.publish(Event(
+                            "AUDIT", "POLICY",
+                            f"Audit policy: {policy} - {status}",
+                            severity=Severity.INFO,
+                            data={"policy": policy, "status": status}
+                        ))
+                    elif self._prev_policies[policy] != status:
+                        self.bus.publish(Event(
+                            "AUDIT", "POLICY_CHANGE",
+                            f"Audit policy changed: {policy} - {self._prev_policies[policy]} -> {status}",
+                            severity=Severity.WARNING,
+                            data={"policy": policy,
+                                  "old_status": self._prev_policies[policy],
+                                  "new_status": status}
+                        ))
+                
+                self._prev_policies = current_policies
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(60.0)
+
+
+# ============================================================
+# Security Compliance Monitor
+# ============================================================
+class SecurityComplianceMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 180.0):
+        super().__init__("SEC_COMPLIANCE", bus, interval)
+        self._prev_settings: Dict[str, str] = {}
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                # Check Windows Security Center
+                result = subprocess.run(
+                    ["powershell", "-Command", 
+                     "Get-CimInstance -Namespace root/securitycenter2 -ClassName AntiVirusProduct | "
+                     "Select-Object displayName,productState"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
+                )
+                
+                if result.stdout:
+                    for line in result.stdout.splitlines():
+                        if line.strip() and 'displayName' not in line:
+                            setting = line.strip()
+                            if setting not in self._prev_settings:
+                                self._prev_settings[setting] = "unknown"
+                            self.bus.publish(Event(
+                                "SEC_COMPLIANCE", "SECURITY_PRODUCT",
+                                f"Security product: {setting}",
+                                severity=Severity.INFO,
+                                data={"product": setting}
+                            ))
+                
+                # Check Windows Update status
+                result = subprocess.run(
+                    ["powershell", "-Command", 
+                     "Get-WindowsUpdateLog -LastEntry | Select-Object -ExpandProperty TimeCreated"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
+                )
+                
+                if result.stdout:
+                    last_update = result.stdout.strip()
+                    if "last_update" not in self._prev_settings:
+                        self._prev_settings["last_update"] = last_update
+                        self.bus.publish(Event(
+                            "SEC_COMPLIANCE", "UPDATE_INFO",
+                            f"Last Windows Update: {last_update}",
+                            severity=Severity.INFO,
+                            data={"time": last_update}
+                        ))
+                else:
+                    self.bus.publish(Event(
+                        "SEC_COMPLIANCE", "UPDATE_CHECK",
+                        "Could not retrieve Windows Update status",
+                        severity=Severity.WARNING
+                    ))
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(60.0)
+
+
+# ============================================================
+# Advanced Networking Monitor
+# ============================================================
+class AdvancedNetworkingMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 15.0):
+        super().__init__("NET_ADV", bus, interval)
+        self._prev_routes: Set[str] = set()
+        self._prev_dns_servers: Set[str] = set()
+        
+    def _run(self):
+        while not self._stop.is_set():
+            try:
+                # Check routing table changes
+                result = subprocess.run(
+                    ["route", "print"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
+                )
+                
+                current_routes = set()
+                for line in result.stdout.splitlines():
+                    if line.strip() and not line.startswith("Interface") and not line.startswith("---"):
+                        parts = line.split()
+                        if len(parts) >= 3:
+                            route = f"{parts[0]} -> {parts[1]} via {parts[2]}"
+                            current_routes.add(route)
+                
+                new_routes = current_routes - self._prev_routes
+                for route in new_routes[:5]:
+                    self.bus.publish(Event(
+                        "NET_ADV", "NEW_ROUTE",
+                        f"New network route: {route}",
+                        severity=Severity.INFO,
+                        data={"route": route}
+                    ))
+                
+                self._prev_routes = current_routes
+                
+                # Check DNS servers
+                try:
+                    import socket
+                    dns_servers = set()
+                    try:
+                        result = subprocess.run(
+                            ["powershell", "-Command", "Get-DnsClientServerAddress | Select-Object -ExpandProperty ServerAddresses"],
+                            capture_output=True, encoding='utf-8', errors='replace', timeout=10
+                        )
+                        for line in result.stdout.splitlines():
+                            if line.strip() and ':' not in line:
+                                dns_servers.add(line.strip())
+                    except Exception:
+                        pass
+                    
+                    new_dns = dns_servers - self._prev_dns_servers
+                    for dns in new_dns:
+                        self.bus.publish(Event(
+                            "NET_ADV", "NEW_DNS",
+                            f"New DNS server configured: {dns}",
+                            severity=Severity.NOTICE,
+                            data={"dns": dns}
+                        ))
+                    
+                    self._prev_dns_servers = dns_servers
+                except Exception:
+                    pass
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(15.0)
+
+
+# ============================================================
+# Performance Counter Monitor (Extended)
+# ============================================================
+class ExtendedPerformanceMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 10.0):
+        super().__init__("PERF_EXT", bus, interval)
+        self._prev_values: Dict[str, float] = {}
+        
+    def _run(self):
+        try:
+            import psutil
+            while not self._stop.is_set():
+                try:
+                    metrics = {}
+                    
+                    # CPU detailed metrics
+                    cpu_times = psutil.cpu_times_percent(interval=1)
+                    metrics['cpu_user'] = cpu_times.user
+                    metrics['cpu_system'] = cpu_times.system
+                    metrics['cpu_idle'] = cpu_times.idle
+                    
+                    # Memory detailed metrics
+                    mem = psutil.virtual_memory()
+                    metrics['mem_available_mb'] = mem.available / 1024 / 1024
+                    metrics['mem_used_mb'] = mem.used / 1024 / 1024
+                    metrics['mem_free_mb'] = mem.free / 1024 / 1024
+                    
+                    # Disk I/O
+                    disk_io = psutil.disk_io_counters()
+                    if disk_io:
+                        metrics['disk_read_bytes'] = disk_io.read_bytes
+                        metrics['disk_write_bytes'] = disk_io.write_bytes
+                    
+                    # Network I/O
+                    net_io = psutil.net_io_counters()
+                    metrics['net_packets_sent'] = net_io.packets_sent
+                    metrics['net_packets_recv'] = net_io.packets_recv
+                    metrics['net_errin'] = net_io.errin
+                    metrics['net_errout'] = net_io.errout
+                    
+                    # Check for significant changes
+                    for name, value in metrics.items():
+                        if name in self._prev_values:
+                            if abs(value - self._prev_values[name]) / max(self._prev_values[name], 1) > 0.2:
+                                self.bus.publish(Event(
+                                    "PERF_EXT", "METRIC_CHANGE",
+                                    f"Performance metric changed: {name} = {value}",
+                                    severity=Severity.DEBUG,
+                                    data={"metric": name, "value": value,
+                                          "old_value": self._prev_values[name]}
+                                ))
+                        self._prev_values[name] = value
+                    
+                    time.sleep(self.interval)
+                except Exception as e:
+                    self.bus.publish(Event("PERF_EXT", "ERROR", str(e), severity=Severity.ERROR))
+                    time.sleep(10.0)
+        except ImportError:
+            self.bus.publish(Event("PERF_EXT", "ERROR", "psutil not available", severity=Severity.WARNING))
+
+
+# ============================================================
+# Windows Service Monitor (Extended)
+# ============================================================
+class ExtendedServiceMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 60.0):
+        super().__init__("SERVICE_EXT", bus, interval)
+        self._service_configs: Dict[str, str] = {}
+        self._critical_services = [
+            "wuauserv", "BITS", "wscsvc", "WinDefend", 
+            "mpsSvc", "Audiosrv", "Schedule", "CryptSvc"
+        ]
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["sc", "query", "type=", "service"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=30
+                )
+                
+                current_services = {}
+                name = None
+                for line in result.stdout.splitlines():
+                    if line.startswith("SERVICE_NAME:"):
+                        name = line.split(":", 1)[1].strip()
+                    elif line.startswith("STATE:") and name:
+                        state = line.split(":", 1)[1].strip()
+                        current_services[name] = state
+                        # Check for critical service status
+                        if name.lower() in [s.lower() for s in self._critical_services]:
+                            if state != "RUNNING":
+                                self.bus.publish(Event(
+                                    "SERVICE_EXT", "CRITICAL_SERVICE",
+                                    f"Critical service status: {name} - {state}",
+                                    severity=Severity.WARNING,
+                                    data={"service": name, "state": state}
+                                ))
+                
+                # Check for services that stopped unexpectedly
+                for name, state in current_services.items():
+                    prev_state = self._service_configs.get(name)
+                    if prev_state and prev_state == "RUNNING" and state != "RUNNING":
+                        self.bus.publish(Event(
+                            "SERVICE_EXT", "SERVICE_STOPPED",
+                            f"Service unexpectedly stopped: {name}",
+                            severity=Severity.WARNING,
+                            data={"service": name, "state": state}
+                        ))
+                
+                self._service_configs = current_services
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(60.0)
+
+
+# ============================================================
+# Hardware Health Monitor (Extended)
+# ============================================================
+class ExtendedHardwareMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 45.0):
+        super().__init__("HW_EXT", bus, interval)
+        self._prev_temps: Dict[str, float] = {}
+        self._prev_voltages: Dict[str, float] = {}
+        
+    def _run(self):
+        try:
+            import psutil
+            while not self._stop.is_set():
+                try:
+                    # Temperature monitoring
+                    temps = psutil.sensors_temperatures()
+                    if temps:
+                        for name, entries in temps.items():
+                            for entry in entries:
+                                label = entry.label or f"{name}_temp"
+                                temp = entry.current
+                                prev_temp = self._prev_temps.get(label)
+                                if prev_temp is not None and abs(temp - prev_temp) > 5.0:
+                                    self.bus.publish(Event(
+                                        "HW_EXT", "TEMP_CHANGE",
+                                        f"Temperature spike: {label} {prev_temp}C -> {temp}C",
+                                        severity=Severity.INFO if temp < 80 else Severity.WARNING,
+                                        data={"sensor": label,
+                                              "old_temp": prev_temp,
+                                              "new_temp": temp}
+                                    ))
+                                self._prev_temps[label] = temp
+                    
+                    # Fan speed monitoring
+                    fans = psutil.sensors_fans()
+                    if fans:
+                        for name, entries in fans.items():
+                            for entry in entries:
+                                fan_name = f"{name}_{entry.label or 'fan'}"
+                                speed = entry.current
+                                if speed > 0:
+                                    self.bus.publish(Event(
+                                        "HW_EXT", "FAN_SPEED",
+                                        f"Fan speed: {fan_name} = {speed} RPM",
+                                        severity=Severity.DEBUG,
+                                        data={"fan": fan_name, "speed": speed}
+                                    ))
+                    
+                    time.sleep(self.interval)
+                except AttributeError:
+                    break
+                except Exception:
+                    time.sleep(30.0)
+        except ImportError:
+            return
+
+
+# ============================================================
+# Power Management Monitor (Extended)
+# ============================================================
+class ExtendedPowerMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 30.0):
+        super().__init__("POWER_EXT", bus, interval)
+        self._prev_plan: str = ""
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powercfg", "/q"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
+                )
+                
+                current_plan = ""
+                for line in result.stdout.splitlines():
+                    if line.strip().startswith("Power Scheme"):
+                        current_plan = line.strip()[:100]
+                        break
+                
+                if current_plan and current_plan != self._prev_plan:
+                    if self._prev_plan:
+                        self.bus.publish(Event(
+                            "POWER_EXT", "PLAN_CHANGE",
+                            f"Power plan changed: {current_plan}",
+                            severity=Severity.NOTICE,
+                            data={"plan": current_plan}
+                        ))
+                    self._prev_plan = current_plan
+                
+                # Check battery status in detail
+                try:
+                    import psutil
+                    battery = psutil.sensors_battery()
+                    if battery:
+                        status = "Charging" if battery.power_plugged else "Discharging"
+                        if battery.percent < 20 and battery.power_plugged == False:
+                            self.bus.publish(Event(
+                                "POWER_EXT", "LOW_BATTERY",
+                                f"Battery low: {battery.percent}% ({status})",
+                                severity=Severity.WARNING,
+                                data={"percent": battery.percent,
+                                      "time_left": battery.secsleft}
+                            ))
+                except Exception:
+                    pass
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# USB Device Tracking Monitor (Extended)
+# ============================================================
+class ExtendedUSBMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 20.0):
+        super().__init__("USB_EXT", bus, interval)
+        self._prev_usb_devices: Set[str] = set()
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command", 
+                     "Get-PnpDevice -Class USB | Select-Object FriendlyName, Status, InstanceId"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=15
+                )
+                
+                current_devices = set()
+                for line in result.stdout.splitlines():
+                    if line.strip() and not line.startswith("FriendlyName"):
+                        device = line.strip()[:150]
+                        current_devices.add(device)
+                
+                new_devices = current_devices - self._prev_usb_devices
+                for device in new_devices:
+                    self.bus.publish(Event(
+                        "USB_EXT", "DEVICE_CONNECTED",
+                        f"USB device connected: {device[:80]}",
+                        severity=Severity.INFO,
+                        data={"device": device}
+                    ))
+                
+                removed_devices = self._prev_usb_devices - current_devices
+                for device in removed_devices:
+                    self.bus.publish(Event(
+                        "USB_EXT", "DEVICE_DISCONNECTED",
+                        f"USB device disconnected: {device[:80]}",
+                        severity=Severity.NOTICE,
+                        data={"device": device}
+                    ))
+                
+                self._prev_usb_devices = current_devices
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# Scheduled Task Monitoring (Extended)
+# ============================================================
+class ExtendedTaskMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 90.0):
+        super().__init__("TASK_EXT", bus, interval)
+        self._prev_tasks: Dict[str, str] = {}
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["schtasks", "/query", "/fo", "CSV"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=30
+                )
+                
+                current_tasks = {}
+                for line in result.stdout.splitlines():
+                    parts = line.split(",")
+                    if len(parts) >= 2:
+                        task_name = parts[0].strip('"')
+                        task_status = parts[1].strip('"')
+                        current_tasks[task_name] = task_status
+                
+                # Check for new tasks
+                for task_name, task_status in current_tasks.items():
+                    if task_name not in self._prev_tasks:
+                        self.bus.publish(Event(
+                            "TASK_EXT", "NEW_TASK",
+                            f"Scheduled task detected: {task_name}",
+                            severity=Severity.INFO,
+                            data={"task": task_name, "status": task_status}
+                        ))
+                    elif self._prev_tasks[task_name] != task_status:
+                        self.bus.publish(Event(
+                            "TASK_EXT", "TASK_STATUS_CHANGE",
+                            f"Task status changed: {task_name} - {self._prev_tasks[task_name]} -> {task_status}",
+                            severity=Severity.NOTICE,
+                            data={"task": task_name,
+                                  "old_status": self._prev_tasks[task_name],
+                                  "new_status": task_status}
+                        ))
+                
+                self._prev_tasks = current_tasks
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(60.0)
+
+
+# ============================================================
+# Windows Event Forwarding Monitor
+# ============================================================
+class EventForwardingMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 120.0):
+        super().__init__("WEF", bus, interval)
+        self._prev_subscription_count = 0
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["wevtutil", "gs", "subscription"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
+                )
+                
+                current_count = len([line for line in result.stdout.splitlines() if line.strip()])
+                
+                if current_count != self._prev_subscription_count:
+                    self.bus.publish(Event(
+                        "WEF", "SUBSCRIPTION_CHANGE",
+                        f"Event forwarding subscriptions changed: {self._prev_subscription_count} -> {current_count}",
+                        severity=Severity.NOTICE,
+                        data={"old_count": self._prev_subscription_count,
+                              "new_count": current_count}
+                    ))
+                    self._prev_subscription_count = current_count
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(120.0)
+
+
+# ============================================================
+# Security Logging Monitor
+# ============================================================
+class SecurityLoggingMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 20.0):
+        super().__init__("SEC_LOG", bus, interval)
+        self._prev_log_size: Dict[str, int] = {}
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                log_names = ["Security", "System", "Application"]
+                for log_name in log_names:
+                    try:
+                        import win32evtlog
+                        hand = win32evtlog.OpenEventLog(None, log_name)
+                        # Get log info
+                        total_events = win32evtlog.GetNumberOfEventLogRecords(hand)
+                        win32evtlog.CloseEventLog(hand)
+                        
+                        prev_size = self._prev_log_size.get(log_name, 0)
+                        if prev_size == 0:
+                            self._prev_log_size[log_name] = total_events
+                        elif total_events != prev_size:
+                            self.bus.publish(Event(
+                                "SEC_LOG", "LOG_CHANGE",
+                                f"Event log changed: {log_name} - {prev_size} -> {total_events} records",
+                                severity=Severity.INFO,
+                                data={"log": log_name,
+                                      "old_count": prev_size,
+                                      "new_count": total_events}
+                            ))
+                            self._prev_log_size[log_name] = total_events
+                    except ImportError:
+                        return
+                    except Exception:
+                        pass
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# Defender ATP Monitor
+# ============================================================
+# ============================================================
+# Windows Event Log Forwarder Monitor
+# ============================================================
+class EventLogForwarderMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 180.0):
+        super().__init__("EVENT_FWD", bus, interval)
+        self._prev_config = None
+        
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["wevtutil", "gl", "ForwardedEvents"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=10
+                )
+                
+                config = result.stdout.strip()
+                if config and config != self._prev_config:
+                    if self._prev_config:
+                        self.bus.publish(Event(
+                            "EVENT_FWD", "CONFIG_CHANGE",
+                            "Event log forwarding configuration changed",
+                            severity=Severity.WARNING,
+                            data={"config": config[:200]}
+                        ))
+                    self._prev_config = config
+                
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(60.0)
 
 def main():
     app = RollingLogMonitor()
