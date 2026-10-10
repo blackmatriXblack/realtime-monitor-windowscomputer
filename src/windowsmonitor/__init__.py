@@ -2,7 +2,7 @@
 Windows Monitor - Comprehensive real-time Windows system monitoring package
 """
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 __author__ = "Windows Monitor"
 __description__ = "Comprehensive real-time Windows system monitoring with rolling log display"
 
@@ -39,7 +39,27 @@ from .__main__ import (
     ExtendedTaskMonitor,
     EventForwardingMonitor,
     SecurityLoggingMonitor,
-    DefenderATPMonitor
+    DefenderATPMonitor,
+    MemoryDumpMonitor,
+    ProcessInjectionMonitor,
+    NetworkSniffingMonitor,
+    PowerShellLoggingMonitor,
+    CredentialGuardMonitor,
+    DeviceEncryptionMonitor,
+    SecureBootMonitor,
+    UEFIValidationMonitor,
+    ApplicationControlMonitor,
+    ExploitProtectionMonitor,
+    ControlledFolderAccessMonitor,
+    AttackSurfaceReductionMonitor,
+    EndpointDetectionMonitor,
+    MalwareProtectionMonitor,
+    NetworkInspectionMonitor,
+    ThreatIntelligenceMonitor,
+    SignatureUpdateMonitor,
+    QuarantineMonitor,
+    BehaviorMonitoringMonitor,
+    CloudDeliveryMonitor
 )
 
 __all__ = [
@@ -75,5 +95,25 @@ __all__ = [
     "ExtendedTaskMonitor",
     "EventForwardingMonitor",
     "SecurityLoggingMonitor",
-    "DefenderATPMonitor"
+    "DefenderATPMonitor",
+    "MemoryDumpMonitor",
+    "ProcessInjectionMonitor",
+    "NetworkSniffingMonitor",
+    "PowerShellLoggingMonitor",
+    "CredentialGuardMonitor",
+    "DeviceEncryptionMonitor",
+    "SecureBootMonitor",
+    "UEFIValidationMonitor",
+    "ApplicationControlMonitor",
+    "ExploitProtectionMonitor",
+    "ControlledFolderAccessMonitor",
+    "AttackSurfaceReductionMonitor",
+    "EndpointDetectionMonitor",
+    "MalwareProtectionMonitor",
+    "NetworkInspectionMonitor",
+    "ThreatIntelligenceMonitor",
+    "SignatureUpdateMonitor",
+    "QuarantineMonitor",
+    "BehaviorMonitoringMonitor",
+    "CloudDeliveryMonitor"
 ]
