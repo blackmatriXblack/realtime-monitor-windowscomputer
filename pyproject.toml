@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "windows-monitor"
-version = "6.0.0"
+version = "7.0.0"
 description = "Comprehensive real-time Windows system monitoring with rolling log display"
 readme = "README.md"
 license = {text = "MIT"}
