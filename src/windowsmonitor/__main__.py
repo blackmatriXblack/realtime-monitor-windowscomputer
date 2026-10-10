@@ -104,38 +104,44 @@ class Event:
     def date_str(self) -> str:
         return datetime.datetime.fromtimestamp(self.ts).strftime("%Y-%m-%d")
     
-    def line(self, show_data: bool = True, width: int = 120) -> str:
+    
+    def line(self, show_data: bool = True, width: int = 200, full_data: bool = False) -> str:
+        """Generate a single-line display for this event.
+        
+        Args:
+            show_data: Whether to include event data
+            width: Maximum line width (ignored when full_data=True)
+            full_data: If True, show ALL data fields without any truncation
+        """
         icons = {
-            "DNS": "->", "PROCESS": "[P]", "NETWORK": "[N]", "FILE": "[F]",
-            "SYSTEM": "[S]", "SERVICE": "[SRV]", "SEARCH": "[?]", "FIREWALL": "[FW]",
-            "STARTUP": "[ST]", "POWER": "[PW]", "USER": "[U]", "DEVICE": "[DEV]",
-            "CLIPBOARD": "[CB]", "THREAT": "[!]", "LAN": "[LAN]", "WIFI": "[WIFI]",
-            "SHARE": "[SH]", "IDLE": "[Z]", "API": "[API]", "DEFENDER": "[AV]",
-            "BROWSER": "[BR]", "CONFIG": "[C]", "STATS": "[ST]", "ERROR": "[!]",
-            "MONITOR": "[M]", "REGISTRY": "[REG]", "WMI": "[W]", "EVENTLOG": "[EL]",
-            "USB": "[USB]", "TASK": "[T]", "MODULE": "[MOD]", "MEMORY": "[MEM]",
-            "HANDLE": "[H]", "THREAD": "[TH]", "IMAGE": "[IMG]", "DRIVER": "[DRV]",
-            "BATTERY": "[BAT]", "TEMP": "[TMP]", "DISK": "[DSK]", "CPU_CORE": "[CPU]",
-            "BANDWIDTH": "[BW]", "PROC_RES": "[PR]", "SESSION": "[SES]", "ENV": "[ENV]",
-            "LOGTAIL": "[LT]", "PORT": "[PT]", "WEB": "[WEB]",
-            "THREAT_ADV": "[TA]", "K_DRIVER": "[KDRV]", "NET_ANALYSIS": "[NTA]",
-            "PROC_INTEGRITY": "[PI]", "REG_INTEGRITY": "[RI]", "FILE_INTEGRITY": "[FI]",
-            "CRED_MONITOR": "[CRED]", "CLOUD": "[CLD]", "CONTAINER": "[CTNR]",
-            "SYS_INTEGRITY": "[SI]", "AUDIT": "[AUD]", "SEC_COMPLIANCE": "[SC]",
-            "NET_ADV": "[NA]", "PERF_EXT": "[PERF]", "SERVICE_EXT": "[SVCE]",
-            "HW_EXT": "[HWE]", "POWER_EXT": "[PWE]", "USB_EXT": "[USBE]",
-            "TASK_EXT": "[TKE]", "EVENT_FWD": "[EFW]", "SEC_LOG": "[SLG]",
-            "DEFENDER_ATP": "[DATP]",
-            "SYSTEM_CENTER": "[SC]", "WINDOWS_ANALYTICS": "[WA]", "TELEMETRY": "[TLM]",
-            "WINDOWS_INSIDER": "[WI]", "HELLO": "[HL]", "SMARTSCREEN": "[SS]",
-            "APPLOCKER": "[AL]", "EDR": "[EDR]", "MRT": "[MRT]", "QUARANTINE": "[QUA]",
-            "CLOUD_DELIVERY": "[CD]", "NETWORK_INSPECTION": "[NI]", "WEC": "[WEC]",
-            "WAC": "[WAC]", "IIS": "[IIS]", "SQL": "[SQL]", "EXCHANGE": "[EXC]",
-            "AD": "[AD]", "GP": "[GP]", "RESET": "[RST]", "PERFMON": "[PFM]",
-            "WEF": "[WEF]", "LAPS": "[LAPS]", "WPR": "[WPR]", "MEMDIAG": "[MDG]",
-            "INSIDER": "[INSD]", "WU_TELE": "[WUT]", "WU_LOG": "[WUL]",
+            "DNS": "DNS", "PROCESS": "PROC", "NETWORK": "NETW", "FILE": "FILE",
+            "SYSTEM": "SYST", "SERVICE": "SRVC", "SEARCH": "SRCH", "FIREWALL": "FIREW",
+            "STARTUP": "STRT", "POWER": "POWR", "USER": "USER", "DEVICE": "DEVI",
+            "CLIPBOARD": "CLIP", "THREAT": "THRE", "LAN": "LAN_", "WIFI": "WIFI",
+            "SHARE": "SHAR", "IDLE": "IDLE", "API": "API_", "DEFENDER": "DEFR",
+            "BROWSER": "BRWS", "CONFIG": "CONF", "STATS": "STAT", "ERROR": "ERR_",
+            "MONITOR": "MON_", "REGISTRY": "REG_", "WMI": "WMI_", "EVENTLOG": "EVTL",
+            "USB": "USB_", "TASK": "TASK", "MODULE": "MOD_", "MEMORY": "MEM_",
+            "HANDLE": "HDL_", "THREAD": "THRD", "IMAGE": "IMG_", "DRIVER": "DRVR",
+            "BATTERY": "BAT_", "TEMP": "TEMP", "DISK": "DSK_", "CPU_CORE": "CPU_",
+            "BANDWIDTH": "BAND", "PROC_RES": "PRSC", "SESSION": "SESS", "ENV": "ENVI",
+            "LOGTAIL": "LGT_", "PORT": "PORT", "WEB": "WEB_",
+            "THREAT_ADV": "TADV", "K_DRIVER": "KDVR", "NET_ANALYSIS": "NANL",
+            "PROC_INTEGRITY": "PINT", "REG_INTEGRITY": "RINT", "FILE_INTEGRITY": "FINT",
+            "CRED_MONITOR": "CRED", "CLOUD": "CLOUD", "CONTAINER": "CTNR",
+            "SYS_INTEGRITY": "SINT", "AUDIT": "AUDIT", "SEC_COMPLIANCE": "SCOM",
+            "NET_ADV": "NADV", "PERF_EXT": "PPER", "SERVICE_EXT": "SERV",
+            "HW_EXT": "HWE_", "POWER_EXT": "PWE_", "USB_EXT": "USBE",
+            "TASK_EXT": "TKE_", "EVENT_FWD": "EFWD", "SEC_LOG": "SLOG",
+            "DEFENDER_ATP": "DATP", "MEM_DUMP": "MDMP", "PROC_INJECT": "PINA",
+            "NET_SNIFF": "NSNF", "PS_LOGGING": "PSLG", "CRED_GUARD": "CGRD",
+            "DEV_ENCRYPT": "DEN_", "SECURE_BOOT": "SBT_", "UEFI_VALID": "UEFI",
+            "APP_CONTROL": "ACON", "EXP_PROTECT": "EPRO", "CFA_MONITOR": "CFA_",
+            "ASR_MONITOR": "ASR_", "EDR_MONITOR": "EDR_", "MALWARE_MON": "MALR",
+            "NET_INSPECT": "NINS", "THREAT_INTEL": "TINT", "SIG_UPDATE": "SIGU",
+            "QUARANTINE": "QUAR", "BEHAVIOR_MON": "BHVR", "CLOUD_DELIV": "CDLV",
         }
-        icon = icons.get(self.source, "[*]")
+        icon = icons.get(self.source, "EVT_")
         prefix = ""
         if self.highlight:
             prefix += f"{BOLD}!{RST}"
@@ -151,78 +157,101 @@ class Event:
         }.get(self.severity, "")
         sev_name = SEV_NAME.get(self.severity, "UNKNOWN")
         full_timestamp = self.date_str() + " " + self.time_str()
-        s = (f"{prefix}[{full_timestamp}] [{sev_name:<6}] {sev_color}{icon}{RST} "
-             f"[{self.source:<12}] [{self.category:<12}] {self.message}")
+        
+        s = (f"{prefix}[{full_timestamp}] [{sev_name}] {sev_color}{icon}{RST} "
+             f"[{self.source}] [{self.category}] {BOLD}{self.message}{RST}")
         
         if show_data and self.data:
             parts = []
             for k, v in self.data.items():
                 if isinstance(v, dict):
-                    nested = ", ".join(f"{dk}={dv}" for dk, dv in list(v.items())[:5])
-                    parts.append(f"{k}={{ {nested} }}")
-                elif isinstance(v, (list, tuple)) and len(v) > 3:
-                    parts.append(f"{k}: {','.join(str(x) for x in v[:3])}...({len(v)})")
+                    nested_parts = []
+                    for dk, dv in v.items():
+                        nested_parts.append(f"{dk}={dv}")
+                    parts.append(f"{k}={{ {', '.join(nested_parts)} }}")
+                elif isinstance(v, (list, tuple)):
+                    items = ", ".join(str(x) for x in v)
+                    parts.append(f"{k}=[{items}]")
                 else:
                     parts.append(f"{k}={v}")
-            data_str = " | ".join(parts)
-            if len(data_str) > 80:
-                data_str = data_str[:77] + "..."
-            s += f" | {data_str}"
+            
+            if full_data or len(self.data) < 10:
+                data_str = " | ".join(parts)
+                s += f" | {data_str}"
+            else:
+                data_str = " | ".join(parts)
+                s += f" | {data_str}"
         
-        if len(s) > width:
+        if not full_data and width > 0 and len(s) > width:
             s = s[:width-3] + "..."
         return s
     
-    def detail(self, width: int = 120) -> List[str]:
-        """Generate a detailed, multi-line view of this event for full inspection."""
+    def detail(self, width: int = 120, full: bool = True) -> List[str]:
+        """Generate a detailed, multi-line view of this event for full inspection.
+        
+        Args:
+            width: Maximum line width
+            full: If True, show absolutely ALL data including long strings and lists
+        """
         lines = []
-        sep_color = f"{DIM}{'=' * (width - 2)}{RST}"
-        header = (f"{BOLD}{'=' * width}{RST}\n"
-                  f"{BOLD}Event Detail{'=' * (width - 14)}{RST}")
+        sep = "=" * width
+        sep_color = f"{DIM}{sep}{RST}"
+        header = f"{BOLD}{sep}{RST}"
+        title_bar = f"{BOLD}Event Detail ({width} chars wide){'=' * max(1, width - 30)}{RST}"
         lines.append(header)
+        lines.append(title_bar)
         lines.append(sep_color)
         
         ts = datetime.datetime.fromtimestamp(self.ts)
-        lines.append(f"Timestamp:      {ts.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]} (epoch: {self.ts:.3f})")
-        lines.append(f"Sequence #:      {self._seq}")
-        lines.append(f"Severity:        {SEV_NAME.get(self.severity, 'UNKNOWN')} ({self.severity})")
-        lines.append(f"Source:          {self.source}")
-        lines.append(f"Category:        {self.category}")
-        lines.append(f"Bookmarked:      {'Yes' if self.bookmarked else 'No'}")
-        lines.append(f"Highlighted:     {'Yes' if self.highlight else 'No'}")
+        lines.append(f"Timestamp (UTC):     {ts.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}")
+        lines.append(f"Timestamp (Epoch):   {self.ts:.9f}")
+        lines.append(f"Sequence Number:     {self._seq}")
+        lines.append(f"Severity:            {SEV_NAME.get(self.severity, 'UNKNOWN')} ({self.severity})")
+        lines.append(f"Source:              {self.source}")
+        lines.append(f"Category:            {self.category}")
+        lines.append(f"Bookmarked:          {'Yes' if self.bookmarked else 'No'}")
+        lines.append(f"Highlighted:         {'Yes' if self.highlight else 'No'}")
         lines.append(sep_color)
         
-        msg_lines = self._wrap_text(self.message, width - 2, indent=2)
+        lines.append(f"Message:")
+        msg_lines = self._wrap_text(self.message, width - 2, indent=2, full=full)
         lines.extend(msg_lines)
         lines.append(sep_color)
         
-        if self.data:
-            lines.append(f"Event Data ({len(self.data)} fields):")
+        if full:
+            lines.append(f"Event Data (COMPLETE - {len(self.data)} fields, showing all):")
             for k, v in self.data.items():
                 lines.append(f"  {BOLD}{k}{RST}:")
-                if isinstance(v, dict):
-                    for dk, dv in v.items():
-                        if isinstance(dv, (dict, list, tuple)):
+                self._format_value_recursive(k, v, width - 6, 2, lines)
+        else:
+            if self.data:
+                lines.append(f"Event Data ({len(self.data)} fields):")
+                for k, v in self.data.items():
+                    lines.append(f"  {BOLD}{k}{RST}:")
+                    if isinstance(v, dict):
+                        for dk, dv in v.items():
                             lines.append(f"    {dk}: {self._format_value(dv, width - 6)}")
-                        else:
-                            lines.append(f"    {dk}: {dv}")
-                elif isinstance(v, (list, tuple)):
-                    items = list(v)
-                    for idx, item in enumerate(items[:20]):
-                        lines.append(f"    [{idx}] {self._format_value(item, width - 6)}")
-                    if len(items) > 20:
-                        lines.append(f"    ... and {len(items) - 20} more items")
-                elif isinstance(v, str) and len(v) > 100:
-                    lines.append(f"    {v[:500]}")
-                    if len(v) > 500:
-                        lines.append(f"    ... ({len(v)} chars total)")
-                else:
-                    lines.append(f"    {self._format_value(v, width - 6)}")
-            lines.append(sep_color)
+                    elif isinstance(v, (list, tuple)):
+                        items = list(v)
+                        for idx, item in enumerate(items[:20]):
+                            lines.append(f"    [{idx}] {self._format_value(item, width - 6)}")
+                        if len(items) > 20:
+                            lines.append(f"    ... and {len(items) - 20} more items")
+                    else:
+                        lines.append(f"    {self._format_value(v, width - 6)}")
+        lines.append(sep_color)
         
-        lines.append(f"Raw event (JSON-like):")
+        import hashlib
+        data_str = json.dumps(self.data, default=str, sort_keys=True)
+        msg_hash = hashlib.sha256(f"{self.source}:{self.category}:{self.message}:{data_str}".encode()).hexdigest()
+        lines.append(f"Message Hash (SHA256): {msg_hash}")
+        lines.append(sep_color)
+        
+        lines.append(f"Raw event (JSON):")
         raw = json.dumps({
             "ts": self.ts,
+            "date": ts.strftime('%Y-%m-%d'),
+            "time": ts.strftime('%H:%M:%S.%f')[:-3],
             "seq": self._seq,
             "source": self.source,
             "category": self.category,
@@ -232,37 +261,102 @@ class Event:
             "data": self.data,
             "bookmarked": self.bookmarked,
             "highlighted": self.highlight
-        }, default=str, indent=2)
+        }, default=str, indent=2, ensure_ascii=False)
         for raw_line in raw.split('\n'):
-            if len(raw_line) > width:
-                lines.append(raw_line[:width-3] + "...")
+            if width > 0 and len(raw_line) > width:
+                if full:
+                    chunk_size = width
+                    for i in range(0, len(raw_line), chunk_size):
+                        lines.append(raw_line[i:i+chunk_size])
+                else:
+                    lines.append(raw_line[:width-3] + "...")
             else:
                 lines.append(raw_line)
         lines.append(sep_color)
-        lines.append(f"{BOLD}{'=' * width}{RST}")
+        lines.append(f"{BOLD}End of Event Detail{sep}{RST}")
         return lines
     
-    def _wrap_text(self, text: str, width: int, indent: int = 0) -> List[str]:
-        import textwrap
-        result = []
+    def _format_value_recursive(self, key: str, value: Any, width: int, indent_level: int, lines: List[str]):
+        """Recursively format values for full detail display."""
+        indent = "    " * indent_level
+        if isinstance(value, dict):
+            for dk, dv in value.items():
+                if isinstance(dv, (dict, list, tuple)):
+                    lines.append(f"{indent}{dk}:")
+                    self._format_value_recursive(dk, dv, width - (indent_level * 4), indent_level + 1, lines)
+                else:
+                    val_str = str(dv)
+                    if width > 0 and len(val_str) > width - (indent_level * 4):
+                        for i in range(0, len(val_str), width - (indent_level * 4)):
+                            lines.append(f"{indent}  {val_str[i:i+width-(indent_level*4)]}")
+                    else:
+                        lines.append(f"{indent}{dk}: {val_str}")
+        elif isinstance(value, (list, tuple)):
+            items = list(value)
+            lines.append(f"{indent}List ({len(items)} items):")
+            for idx, item in enumerate(items):
+                if isinstance(item, (dict, list, tuple)):
+                    lines.append(f"{indent}  [{idx}]:")
+                    self._format_value_recursive(str(idx), item, width - (indent_level * 4), indent_level + 1, lines)
+                else:
+                    val_str = str(item)
+                    if width > 0 and len(val_str) > width - (indent_level * 4) - 6:
+                        lines.append(f"{indent}  [{idx}]: {val_str}")
+                    else:
+                        lines.append(f"{indent}  [{idx}]: {val_str}")
+        elif isinstance(value, str):
+            val_str = value
+            lines.append(f"{indent}{val_str}")
+        elif isinstance(value, bytes):
+            try:
+                decoded = value.decode('utf-8', errors='replace')
+                lines.append(f"{indent}{decoded}")
+            except Exception:
+                lines.append(f"{indent}{repr(value)}")
+        else:
+            lines.append(f"{indent}{value}")
+
+    def _wrap_text(self, text: str, width: int, indent: int = 0, full: bool = False) -> List[str]:
+        """Wrap text to fit within width. If full=True, don't truncate."""
         indent_str = " " * indent
-        wrapped = textwrap.wrap(text, width=width, initial_indent=indent_str,
-                               subsequent_indent=indent_str)
-        result.extend(wrapped)
-        if not wrapped:
-            result.append(indent_str)
+        if width <= 0 or len(text) <= width - indent:
+            return [indent_str + text]
+        
+        result = []
+        text = text.strip()
+        pos = 0
+        while pos < len(text):
+            if full:
+                chunk = text[pos:pos + width - indent]
+                result.append(indent_str + chunk)
+                pos += width - indent
+            else:
+                chunk = text[pos:pos + width - indent]
+                if len(chunk) == width - indent and ' ' in chunk:
+                    last_space = chunk.rfind(' ')
+                    if last_space > 0:
+                        chunk = chunk[:last_space]
+                        pos += last_space + 1
+                    else:
+                        pos += width - indent
+                else:
+                    pos += width - indent
+                result.append(indent_str + chunk)
         return result
     
     def _format_value(self, v: Any, max_width: int) -> str:
+        """Format a value for display without truncation."""
         if isinstance(v, str):
-            if len(v) > max_width - 6:
-                return v[:max_width-9] + "..."
             return v
         elif isinstance(v, (list, tuple)):
-            s = str(list(v)[:20])
-            if len(s) > max_width - 6:
-                return s[:max_width-9] + "..."
-            return s
+            return str(list(v))
+        elif isinstance(v, dict):
+            return str(v)
+        elif isinstance(v, bytes):
+            try:
+                return v.decode('utf-8', errors='replace')
+            except Exception:
+                return repr(v)
         return str(v)
 
     def as_log(self) -> str:
@@ -6140,6 +6234,24 @@ Features:
         p.add_argument("--no-quarantine", action="store_true", help="Disable quarantine monitor")
         p.add_argument("--no-behavior", action="store_true", help="Disable behavior monitoring monitor")
         p.add_argument("--no-cloud-deliv", action="store_true", help="Disable cloud delivery monitor")
+        p.add_argument("--no-net-flow", action="store_true", help="Disable network flow monitoring monitor")
+        p.add_argument("--no-security-events", action="store_true", help="Disable security event correlation")
+        p.add_argument("--no-wmi-events", action="store_true", help="Disable WMI event monitoring")
+        p.add_argument("--no-registry-audit", action="store_true", help="Disable registry audit trail monitor")
+        p.add_argument("--no-file-audit", action="store_true", help="Disable file audit trail monitor")
+        p.add_argument("--no-privilege-use", action="store_true", help="Disable privilege use monitoring")
+        p.add_argument("--no-object-access", action="store_true", help="Disable object access monitoring")
+        p.add_argument("--no-cert-monitor", action="store_true", help="Disable certificate store monitor")
+        p.add_argument("--no-autorun-monitor", action="store_true", help="Disable autorun monitoring")
+        p.add_argument("--no-prefetch-monitor", action="store_true", help="Disable prefetch monitoring")
+        p.add_argument("--no-amcache-monitor", action="store_true", help="Disable AmCache monitoring")
+        p.add_argument("--no-wmi-persistence", action="store_true", help="Disable WMI persistence monitoring")
+        p.add_argument("--no-boot-sector", action="store_true", help="Disable boot sector monitoring")
+        p.add_argument("--no-kernel-callbacks", action="store_true", help="Disable kernel callback monitoring")
+        p.add_argument("--no-api-hooks", action="store_true", help="Disable API hook detection")
+        p.add_argument("--no-dll-injection", action="store_true", help="Disable DLL injection detection")
+        p.add_argument("--full-detail", action="store_true", help="Enable full detail mode - show all event data without truncation")
+        p.add_argument("--wide-screen", action="store_true", help="Use wider screen width (200 chars) for detailed view")
 
 
         p.add_argument("--log-dir", type=Path, default=Path("D:/RollingLogMonitor"), help="Log directory")
@@ -6635,7 +6747,43 @@ Features:
         if not self.args.no_cloud_deliv:
             monitors.append(CloudDeliveryMonitor(self.bus, max(interval * 300, 600.0)))
 
-        
+        if not self.args.no_net_flow:
+            monitors.append(NetworkFlowMonitor(self.bus, max(interval * 15, 30.0)))
+        if not self.args.no_process_tree:
+            monitors.append(ProcessTreeDetailMonitor(self.bus, max(interval * 5, 10.0)))
+        if not self.args.no_sysmon:
+            monitors.append(SysmonMonitor(self.bus, max(interval * 2.5, 5.0)))
+        if not self.args.no_security_events:
+            monitors.append(SecurityCorrelatorMonitor(self.bus, max(interval * 15, 30.0)))
+        if not self.args.no_wmi_events:
+            monitors.append(WMIEventMonitor(self.bus, max(interval * 60, 120.0)))
+        if not self.args.no_registry_audit:
+            monitors.append(RegistryAuditMonitor(self.bus, max(interval * 7.5, 15.0)))
+        if not self.args.no_file_audit:
+            monitors.append(FileAuditMonitor(self.bus, max(interval * 10, 20.0)))
+        if not self.args.no_privilege_use:
+            monitors.append(PrivilegeUseMonitor(self.bus, max(interval * 15, 30.0)))
+        if not self.args.no_object_access:
+            monitors.append(ObjectAccessMonitor(self.bus, max(interval * 15, 30.0)))
+        if not self.args.no_cert_monitor:
+            monitors.append(CertificateStoreMonitor(self.bus, max(interval * 300, 600.0)))
+        if not self.args.no_autorun_monitor:
+            monitors.append(AutorunMonitor(self.bus, max(interval * 150, 300.0)))
+        if not self.args.no_prefetch_monitor:
+            monitors.append(PrefetchMonitor(self.bus, max(interval * 30, 60.0)))
+        if not self.args.no_amcache_monitor:
+            monitors.append(AmCacheManager(self.bus, max(interval * 60, 120.0)))
+        if not self.args.no_wmi_persistence:
+            monitors.append(WMIPersistenceMonitor(self.bus, max(interval * 150, 300.0)))
+        if not self.args.no_boot_sector:
+            monitors.append(BootSectorMonitor(self.bus, max(interval * 300, 600.0)))
+        if not self.args.no_kernel_callbacks:
+            monitors.append(KernelCallbackMonitor(self.bus, max(interval * 300, 600.0)))
+        if not self.args.no_api_hooks:
+            monitors.append(ApiHookMonitor(self.bus, max(interval * 7.5, 15.0)))
+        if not self.args.no_dll_injection:
+            monitors.append(DLLInjectionMonitor(self.bus, max(interval * 10, 20.0)))
+
         if not self.args.no_printer:
             monitors.append(PrinterQueueMonitor(self.bus, max(interval * 15, 30.0)))
         
@@ -8967,6 +9115,858 @@ class CloudDeliveryMonitor(BaseMonitor):
             except Exception:
                 time.sleep(120.0)
 
+
+
+
+
+# ============================================================
+# Network Flow Monitoring Monitor
+# ============================================================
+class NetworkFlowMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 30.0):
+        super().__init__("NET_FLOW", bus, interval)
+        self._prev_flows: Dict[str, Any] = {}
+
+    def _run(self):
+        try:
+            import psutil
+            while not self._stop.is_set():
+                try:
+                    for conn in psutil.net_connections(kind='inet'):
+                        if conn.laddr:
+                            flow_key = f"{conn.laddr.ip}:{conn.laddr.port}->{conn.raddr}"
+                            flow_info = {
+                                "local_ip": conn.laddr.ip,
+                                "local_port": conn.laddr.port,
+                                "remote_addr": str(conn.raddr) if conn.raddr else None,
+                                "status": conn.status,
+                                "pid": conn.pid if conn.pid else 0
+                            }
+                            if flow_key not in self._prev_flows:
+                                self._prev_flows[flow_key] = flow_info
+                                self.bus.publish(Event(
+                                    "NET_FLOW", "NEW_CONNECTION",
+                                    f"New network flow: {conn.laddr.ip}:{conn.laddr.port} -> {conn.raddr}",
+                                    severity=Severity.DEBUG,
+                                    data=flow_info
+                                ))
+                            elif self._prev_flows[flow_key].get('status') != flow_info['status']:
+                                self.bus.publish(Event(
+                                    "NET_FLOW", "STATUS_CHANGE",
+                                    f"Flow status changed: {conn.laddr.ip}:{conn.laddr.port} - {self._prev_flows[flow_key].get('status', 'N/A')} -> {conn.status}",
+                                    severity=Severity.NOTICE,
+                                    data={
+                                        "old_status": self._prev_flows[flow_key].get('status', 'N/A'),
+                                        "new_status": conn.status,
+                                        "local_ip": conn.laddr.ip,
+                                        "local_port": conn.laddr.port
+                                    }
+                                ))
+                    # Clean up old flows
+                    current_keys = set(f"{c.laddr.ip}:{c.laddr.port}->{c.raddr}" for c in psutil.net_connections(kind='inet') if c.laddr)
+                    for key in list(self._prev_flows.keys()):
+                        if key not in current_keys:
+                            del self._prev_flows[key]
+                    time.sleep(self.interval)
+                except Exception:
+                    time.sleep(30.0)
+        except ImportError:
+            return
+
+
+# ============================================================
+# Detailed Process Tree Monitor
+# ============================================================
+class ProcessTreeDetailMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 10.0):
+        super().__init__("PROC_TREE", bus, interval)
+        self._prev_tree: Dict[int, str] = {}
+
+    def _run(self):
+        try:
+            import psutil
+            while not self._stop.is_set():
+                try:
+                    current_tree = {}
+                    for proc in psutil.process_iter(['pid', 'ppid', 'name', 'username', 'cmdline', 'create_time']):
+                        try:
+                            info = proc.info
+                            current_tree[info['pid']] = f"{info['ppid']}:{info['name']}"
+                            if info['pid'] not in self._prev_tree:
+                                cmdline = ' '.join(info.get('cmdline', [])) if info.get('cmdline') else ''
+                                self.bus.publish(Event(
+                                    "PROC_TREE", "NEW_PROCESS",
+                                    f"New process: {info['name']} (PID: {info['pid']}) parent: {info['ppid']}",
+                                    severity=Severity.DEBUG,
+                                    data={
+                                        "pid": info['pid'],
+                                        "ppid": info['ppid'],
+                                        "name": info['name'],
+                                        "username": info.get('username', 'N/A'),
+                                        "cmdline": cmdline[:200],
+                                        "create_time": info['create_time']
+                                    }
+                                ))
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            continue
+                    self._prev_tree = current_tree
+                    time.sleep(self.interval)
+                except Exception:
+                    time.sleep(15.0)
+        except ImportError:
+            return
+
+
+# ============================================================
+# Sysmon Event Monitor
+# ============================================================
+class SysmonMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 5.0):
+        super().__init__("SYSMON", bus, interval)
+        self._prev_events: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Sysmon/Operational'; MaxEvents=50} | "
+                     "Select-Object Id, Message, TimeCreated | ConvertTo-Json -Depth 3"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=30
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else None
+                    events = data if isinstance(data, list) else [data] if data else []
+                    for evt in events:
+                        if isinstance(evt, dict):
+                            event_id = evt.get('Id', 0)
+                            message = evt.get('Message', '')
+                            event_key = f"{event_id}:{message[:50]}"
+                            if event_key not in self._prev_events:
+                                self._prev_events.add(event_key)
+                                self.bus.publish(Event(
+                                    "SYSMON", "SYSMON_EVENT",
+                                    f"Sysmon Event {event_id}: {message[:200]}",
+                                    severity=Severity.INFO,
+                                    data={
+                                        "event_id": event_id,
+                                        "message": message,
+                                        "time_created": evt.get('TimeCreated', ''),
+                                        "full_event": evt
+                                    }
+                                ))
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(15.0)
+
+
+# ============================================================
+# Security Event Correlation Monitor
+# ============================================================
+class SecurityCorrelatorMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 30.0):
+        super().__init__("SEC_CORREL", bus, interval)
+        self._event_buffer: List[Dict[str, Any]] = []
+        self._buffer_max = 500
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4624,4625,4648,4670,4674,4697; Level=1,2} -MaxEvents 100 | "
+                     "Select-Object Id, Message, TimeCreated, LevelDisplayName | ConvertTo-Json -Depth 3"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=30
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else None
+                    events = data if isinstance(data, list) else [data] if data else []
+                    for evt in events:
+                        if isinstance(evt, dict):
+                            self._event_buffer.append(evt)
+                            event_id = evt.get('Id', 0)
+                            message = evt.get('Message', '')
+                            
+                            # Correlate events
+                            if event_id in (4625, 4648):
+                                # Failed logon or logon attempt
+                                self.bus.publish(Event(
+                                    "SEC_CORREL", "AUTH_EVENT",
+                                    f"Authentication event {event_id}: {message[:200]}",
+                                    severity=Severity.WARNING,
+                                    data={
+                                        "event_id": event_id,
+                                        "message": message,
+                                        "time_created": evt.get('TimeCreated', ''),
+                                        "level": evt.get('LevelDisplayName', ''),
+                                        "buffer_count": len(self._event_buffer)
+                                    }
+                                ))
+                            elif event_id == 4670:
+                                self.bus.publish(Event(
+                                    "SEC_CORREL", "PERM_CHANGE",
+                                    f"Permissions changed: {message[:200]}",
+                                    severity=Severity.WARNING,
+                                    data={"event_id": event_id, "message": message, "time_created": evt.get('TimeCreated', '')}
+                                ))
+                            elif event_id == 4674:
+                                self.bus.publish(Event(
+                                    "SEC_CORREL", "ELEVATED_PRIV",
+                                    f"Elevated privilege use: {message[:200]}",
+                                    severity=Severity.NOTICE,
+                                    data={"event_id": event_id, "message": message, "time_created": evt.get('TimeCreated', '')}
+                                ))
+                    
+                    if len(self._event_buffer) > self._buffer_max:
+                        self._event_buffer = self._event_buffer[-self._buffer_max:]
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# WMI Event Monitor
+# ============================================================
+class WMIEventMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 60.0):
+        super().__init__("WMI_EVENTS", bus, interval)
+        self._prev_events: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-WMI-Activity/Operational'; MaxEvents=30} | "
+                     "Select-Object Id, Message | ConvertTo-Json -Depth 3"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=25
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else None
+                    events = data if isinstance(data, list) else [data] if data else []
+                    for evt in events:
+                        if isinstance(evt, dict):
+                            event_id = evt.get('Id', 0)
+                            message = evt.get('Message', '')
+                            event_key = f"{event_id}:{message[:50]}"
+                            if event_key not in self._prev_events:
+                                self._prev_events.add(event_key)
+                                self.bus.publish(Event(
+                                    "WMI_EVENTS", "WMI_EVENT",
+                                    f"WMI event {event_id}: {message[:200]}",
+                                    severity=Severity.DEBUG,
+                                    data={
+                                        "event_id": event_id,
+                                        "message": message,
+                                        "full_event": evt
+                                    }
+                                ))
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(60.0)
+
+
+# ============================================================
+# Registry Audit Trail Monitor
+# ============================================================
+class RegistryAuditMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 15.0):
+        super().__init__("REG_AUDIT", bus, interval)
+        self._sensitive_keys = [
+            'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+            'Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce',
+            'SYSTEM\\CurrentControlSet\\Services',
+            'Software\\Policies\\Microsoft\\Windows\\',
+            'SAM\\',
+            'SECURITY\\'
+        ]
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4657} -MaxEvents 30 | "
+                     "Select-Object -ExpandProperty Message"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=25
+                )
+                for line in result.stdout.splitlines():
+                    for skey in self._sensitive_keys:
+                        if skey.lower() in line.lower():
+                            self.bus.publish(Event(
+                                "REG_AUDIT", "SENSITIVE_KEY_ACCESS",
+                                f"Registry access to sensitive key: {line[:200]}",
+                                severity=Severity.WARNING,
+                                data={
+                                    "key": skey,
+                                    "event": line[:300]
+                                }
+                            ))
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# File Audit Trail Monitor
+# ============================================================
+class FileAuditMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 20.0):
+        super().__init__("FILE_AUDIT", bus, interval)
+        self._sensitive_paths = ['C:\\Windows\\System32', 'C:\\Windows\\SysWOW64', 'C:\\boot.ini', 'C:\\Boot']
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4663} -MaxEvents 30 | "
+                     "Select-Object -ExpandProperty Message"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=25
+                )
+                for line in result.stdout.splitlines():
+                    for path in self._sensitive_paths:
+                        if path.lower() in line.lower():
+                            self.bus.publish(Event(
+                                "FILE_AUDIT", "SENSITIVE_FILE_ACCESS",
+                                f"Sensitive file access: {line[:200]}",
+                                severity=Severity.WARNING,
+                                data={
+                                    "path": path,
+                                    "event": line[:300]
+                                }
+                            ))
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# Privilege Use Monitor
+# ============================================================
+class PrivilegeUseMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 30.0):
+        super().__init__("PRIV_USE", bus, interval)
+        self._prev_events: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4670,4671,4674} -MaxEvents 30 | "
+                     "Select-Object -ExpandProperty Message"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=25
+                )
+                for line in result.stdout.splitlines():
+                    if line.strip():
+                        event_hash = hashlib.md5(line.encode()).hexdigest()[:16]
+                        if event_hash not in self._prev_events:
+                            self._prev_events.add(event_hash)
+                            self.bus.publish(Event(
+                                "PRIV_USE", "PRIVILEGE_EVENT",
+                                f"Privileged operation: {line[:200]}",
+                                severity=Severity.NOTICE,
+                                data={
+                                    "event": line[:300],
+                                    "hash": event_hash
+                                }
+                            ))
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# Object Access Monitor
+# ============================================================
+class ObjectAccessMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 30.0):
+        super().__init__("OBJ_ACCESS", bus, interval)
+        self._prev_events: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='Security'; ID=4663} -MaxEvents 50 | "
+                     "Select-Object -ExpandProperty Message"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=25
+                )
+                for line in result.stdout.splitlines():
+                    if line.strip():
+                        event_hash = hashlib.md5(line.encode()).hexdigest()[:16]
+                        if event_hash not in self._prev_events:
+                            self._prev_events.add(event_hash)
+                            self.bus.publish(Event(
+                                "OBJ_ACCESS", "OBJECT_ACCESS",
+                                f"Object access event: {line[:200]}",
+                                severity=Severity.DEBUG,
+                                data={
+                                    "event": line[:300],
+                                    "hash": event_hash
+                                }
+                            ))
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(30.0)
+
+
+# ============================================================
+# Certificate Store Monitor
+# ============================================================
+class CertificateStoreMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 600.0):
+        super().__init__("CERT_STORE", bus, interval)
+        self._prev_certs: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-ChildItem -Path Cert:\\LocalMachine -Recurse | "
+                     "Select-Object Thumbprint, Subject, NotAfter | ConvertTo-Json -Depth 3"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=30
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else []
+                    certs = data if isinstance(data, list) else [data]
+                    current_certs = set()
+                    for cert in certs:
+                        if isinstance(cert, dict):
+                            thumbprint = cert.get('Thumbprint', 'Unknown')
+                            current_certs.add(thumbprint)
+                            not_after = cert.get('NotAfter', '')
+                            try:
+                                if not_after:
+                                    exp_date = datetime.datetime.fromisoformat(not_after.replace('Z', '+00:00'))
+                                    days_to_expiry = (exp_date - datetime.datetime.now(exp_date.tzinfo)).days
+                                    if days_to_expiry < 30:
+                                        self.bus.publish(Event(
+                                            "CERT_STORE", "CERT_EXPIRING",
+                                            f"Certificate expiring soon: {cert.get('Subject', 'Unknown')}",
+                                            severity=Severity.WARNING,
+                                            data={
+                                                "thumbprint": thumbprint,
+                                                "subject": cert.get('Subject', 'Unknown'),
+                                                "expires": not_after,
+                                                "days_remaining": days_to_expiry
+                                            }
+                                        ))
+                            except (ValueError, TypeError):
+                                pass
+                    new_certs = current_certs - self._prev_certs
+                    for cert in new_certs:
+                        self.bus.publish(Event(
+                            "CERT_STORE", "NEW_CERT",
+                            f"New certificate added: {cert}",
+                            severity=Severity.NOTICE,
+                            data={"thumbprint": cert}
+                        ))
+                    self._prev_certs = current_certs
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(120.0)
+
+
+# ============================================================
+# Autorun Persistence Monitor
+# ============================================================
+class AutorunMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 300.0):
+        super().__init__("AUTORUN", bus, interval)
+        self._prev_entries: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-CimInstance -ClassName Win32_StartupCommand | "
+                     "Select-Object Name, Command, Location, User | ConvertTo-Json -Depth 3"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=25
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else []
+                    entries = data if isinstance(data, list) else [data]
+                    current_entries = set()
+                    for entry in entries:
+                        if isinstance(entry, dict):
+                            key = f"{entry.get('Name', '')}:{entry.get('Command', '')[:50]}"
+                            current_entries.add(key)
+                            if key not in self._prev_entries:
+                                self._prev_entries.add(key)
+                                self.bus.publish(Event(
+                                    "AUTORUN", "AUTORUN_ENTRY",
+                                    f"Autorun entry: {entry.get('Name', 'Unknown')} at {entry.get('Location', 'Unknown')}",
+                                    severity=Severity.DEBUG,
+                                    data={
+                                        "name": entry.get('Name', 'Unknown'),
+                                        "command": entry.get('Command', 'N/A'),
+                                        "location": entry.get('Location', 'Unknown'),
+                                        "user": entry.get('User', 'N/A')
+                                    }
+                                ))
+                    new_entries = current_entries - self._prev_entries
+                    for entry in new_entries:
+                        self.bus.publish(Event(
+                            "AUTORUN", "NEW_AUTORUN",
+                            f"New autorun entry detected: {entry}",
+                            severity=Severity.NOTICE,
+                            data={"entry": entry}
+                        ))
+                    self._prev_entries = current_entries
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(300.0)
+
+
+# ============================================================
+# Prefetch Analysis Monitor
+# ============================================================
+class PrefetchMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 60.0):
+        super().__init__("PREFETCH", bus, interval)
+        self._prev_files: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                prefetch_dir = r"C:\Windows\Prefetch"
+                if os.path.exists(prefetch_dir):
+                    current_files = set()
+                    for f in os.listdir(prefetch_dir):
+                        if f.endswith('.pf'):
+                            full_path = os.path.join(prefetch_dir, f)
+                            stat = os.stat(full_path)
+                            current_files.add(f)
+                            if f not in self._prev_files:
+                                self.bus.publish(Event(
+                                    "PREFETCH", "NEW_PREFETCH",
+                                    f"New prefetch file: {f}",
+                                    severity=Severity.DEBUG,
+                                    data={
+                                        "file": f,
+                                        "size": stat.st_size,
+                                        "created": datetime.datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                                        "modified": datetime.datetime.fromtimestamp(stat.st_mtime).isoformat()
+                                    }
+                                ))
+                    self._prev_files = current_files
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(120.0)
+
+
+# ============================================================
+# AmCache Monitor
+# ============================================================
+class AmCacheManager(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 120.0):
+        super().__init__("AMCACHE", bus, interval)
+        self._prev_entries: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VolumeCaches\\*' 2>$null | "
+                     "Where-Object { $_.PSChildName -like '*amcache*' } | "
+                     "Select-Object PSChildName, DisplayName | ConvertTo-Json -Depth 2"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=20
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else []
+                    entries = data if isinstance(data, list) else [data]
+                    for entry in entries:
+                        if isinstance(entry, dict):
+                            key = entry.get('PSChildName', '')
+                            if key and key not in self._prev_entries:
+                                self._prev_entries.add(key)
+                                self.bus.publish(Event(
+                                    "AMCACHE", "ENTRY",
+                                    f"AmCache entry: {key} - {entry.get('DisplayName', '')}",
+                                    severity=Severity.DEBUG,
+                                    data=entry
+                                ))
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(120.0)
+
+
+# ============================================================
+# WMI Persistence Monitor
+# ============================================================
+class WMIPersistenceMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 300.0):
+        super().__init__("WMI_PERSIST", bus, interval)
+        self._prev_events: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-WMI-Activity/Trace'; ID=1,2} -MaxEvents 20 | "
+                     "Select-Object Id, Message | ConvertTo-Json -Depth 3"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=25
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else None
+                    events = data if isinstance(data, list) else [data] if data else []
+                    for evt in events:
+                        if isinstance(evt, dict):
+                            msg = evt.get('Message', '')
+                            event_key = f"{evt.get('Id', 0)}:{msg[:50]}"
+                            if event_key not in self._prev_events:
+                                self._prev_events.add(event_key)
+                                self.bus.publish(Event(
+                                    "WMI_PERSIST", "WMI_EVENT",
+                                    f"WMI persistence event: {msg[:200]}",
+                                    severity=Severity.WARNING,
+                                    data={
+                                        "event_id": evt.get('Id', 0),
+                                        "message": msg,
+                                        "full_event": evt
+                                    }
+                                ))
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(300.0)
+
+
+# ============================================================
+# Boot Sector Monitor
+# ============================================================
+class BootSectorMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 600.0):
+        super().__init__("BOOT_SECTOR", bus, interval)
+        self._last_boot_hash: Optional[str] = None
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='System'; ID=10000,10001,10002,10003,10004} -MaxEvents 10 | "
+                     "Select-Object Id, Message | ConvertTo-Json -Depth 3"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=20
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else None
+                    events = data if isinstance(data, list) else [data] if data else []
+                    for evt in events:
+                        if isinstance(evt, dict):
+                            event_hash = hashlib.md5(json.dumps(evt, default=str).encode()).hexdigest()[:16]
+                            if event_hash != self._last_boot_hash:
+                                self._last_boot_hash = event_hash
+                                self.bus.publish(Event(
+                                    "BOOT_SECTOR", "BOOT_EVENT",
+                                    f"Boot sector event {evt.get('Id', 'Unknown')}: {str(evt.get('Message', ''))[:200]}",
+                                    severity=Severity.WARNING,
+                                    data={
+                                        "event_id": evt.get('Id', 'Unknown'),
+                                        "message": evt.get('Message', ''),
+                                        "hash": event_hash,
+                                        "full_event": evt
+                                    }
+                                ))
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(300.0)
+
+
+# ============================================================
+# Kernel Callback Monitor
+# ============================================================
+class KernelCallbackMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 120.0):
+        super().__init__("KERNEL_CB", bus, interval)
+        self._prev_callbacks: Set[str] = set()
+
+    def _run(self):
+        if sys.platform != "win32":
+            return
+        while not self._stop.is_set():
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command",
+                     "Get-WinEvent -FilterHashtable @{LogName='System'; ID=1001,1002,1003,1004} -MaxEvents 20 | "
+                     "Select-Object Id, Message | ConvertTo-Json -Depth 3"],
+                    capture_output=True, encoding='utf-8', errors='replace', timeout=20
+                )
+                try:
+                    data = json.loads(result.stdout) if result.stdout else None
+                    events = data if isinstance(data, list) else [data] if data else []
+                    for evt in events:
+                        if isinstance(evt, dict):
+                            event_key = json.dumps(evt, default=str, sort_keys=True)[:100]
+                            if event_key not in self._prev_callbacks:
+                                self._prev_callbacks.add(event_key)
+                                self.bus.publish(Event(
+                                    "KERNEL_CB", "CALLBACK_EVENT",
+                                    f"Kernel callback event: {evt.get('Id', 'Unknown')}: {str(evt.get('Message', ''))[:200]}",
+                                    severity=Severity.WARNING,
+                                    data={
+                                        "event_id": evt.get('Id', 'Unknown'),
+                                        "message": evt.get('Message', ''),
+                                        "full_event": evt
+                                    }
+                                ))
+                except json.JSONDecodeError:
+                    pass
+                time.sleep(self.interval)
+            except Exception:
+                time.sleep(120.0)
+
+
+# ============================================================
+# API Hook Detection Monitor
+# ============================================================
+class ApiHookMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 15.0):
+        super().__init__("API_HOOK", bus, interval)
+        self._hook_indicators = [
+            'hook', 'patch', 'intercept', 'trampoline', 'stub',
+            'inline hook', 'IAT', 'EAT', 'hotpatch'
+        ]
+
+    def _run(self):
+        try:
+            import psutil
+            while not self._stop.is_set():
+                try:
+                    suspicious = []
+                    for proc in psutil.process_iter(['pid', 'name', 'memory_maps']):
+                        try:
+                            info = proc.info
+                            if info.get('memory_maps'):
+                                for mem in info['memory_maps']:
+                                    addr = str(mem.get('addr', ''))
+                                    perms = str(mem.get('perms', ''))
+                                    path = str(mem.get('rss', ''))[:50]
+                                    for indicator in self._hook_indicators:
+                                        if indicator in addr.lower() or indicator in path.lower():
+                                            suspicious.append({
+                                                "pid": info['pid'],
+                                                "name": info['name'],
+                                                "indicator": indicator,
+                                                "address": addr,
+                                                "perms": perms
+                                            })
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            continue
+                    
+                    for s in suspicious:
+                        self.bus.publish(Event(
+                            "API_HOOK", "SUSPICIOUS_MEMORY",
+                            f"Suspicious memory region in {s['name']}: {s['indicator']} at {s['address']}",
+                            severity=Severity.WARNING,
+                            data=s
+                        ))
+                    
+                    time.sleep(self.interval)
+                except Exception:
+                    time.sleep(15.0)
+        except ImportError:
+            return
+
+
+# ============================================================
+# DLL Injection Detection Monitor
+# ============================================================
+class DLLInjectionMonitor(BaseMonitor):
+    def __init__(self, bus: EventBus, interval: float = 20.0):
+        super().__init__("DLL_INJECT", bus, interval)
+        self._prev_modules: Dict[int, Set[str]] = {}
+
+    def _run(self):
+        try:
+            import psutil
+            while not self._stop.is_set():
+                try:
+                    for proc in psutil.process_iter(['pid', 'name', 'num_handles', 'num_threads']):
+                        try:
+                            info = proc.info
+                            if info['pid'] in self._prev_modules:
+                                prev_modules = self._prev_modules[info['pid']]
+                                try:
+                                    current_modules = set(m.path for m in proc.memory_maps())
+                                    new_modules = current_modules - prev_modules
+                                    for mod in new_modules:
+                                        if 'dll' in mod.lower() or '.so' in mod.lower():
+                                            self.bus.publish(Event(
+                                                "DLL_INJECT", "NEW_MODULE",
+                                                f"New module loaded in {info['name']} (PID: {info['pid']}): {mod[:100]}",
+                                                severity=Severity.DEBUG,
+                                                data={
+                                                    "process": info['name'],
+                                                    "pid": info['pid'],
+                                                    "module": mod,
+                                                    "handle_count": info.get('num_handles', 0),
+                                                    "thread_count": info.get('num_threads', 0)
+                                                }
+                                            ))
+                                    self._prev_modules[info['pid']] = current_modules
+                                except Exception:
+                                    pass
+                            else:
+                                try:
+                                    self._prev_modules[info['pid']] = set(m.path for m in proc.memory_maps())
+                                except Exception:
+                                    pass
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            continue
+                    time.sleep(self.interval)
+                except Exception:
+                    time.sleep(20.0)
+        except ImportError:
+            return
 
 def main():
     app = RollingLogMonitor()

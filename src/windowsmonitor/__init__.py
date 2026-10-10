@@ -2,7 +2,7 @@
 Windows Monitor - Comprehensive real-time Windows system monitoring package
 """
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 __author__ = "Windows Monitor"
 __description__ = "Comprehensive real-time Windows system monitoring with rolling log display"
 
@@ -18,6 +18,7 @@ from .__main__ import (
     CleanupThread,
     BaseMonitor,
     SEV_NAME,
+    # Extended monitors (Group 1)
     AdvancedThreatMonitor,
     KernelDriverMonitor,
     NetworkTrafficAnalysisMonitor,
@@ -40,6 +41,7 @@ from .__main__ import (
     EventForwardingMonitor,
     SecurityLoggingMonitor,
     DefenderATPMonitor,
+    # Extended monitors (Group 2)
     MemoryDumpMonitor,
     ProcessInjectionMonitor,
     NetworkSniffingMonitor,
@@ -59,7 +61,26 @@ from .__main__ import (
     SignatureUpdateMonitor,
     QuarantineMonitor,
     BehaviorMonitoringMonitor,
-    CloudDeliveryMonitor
+    CloudDeliveryMonitor,
+    # Extended monitors (Group 3)
+    NetworkFlowMonitor,
+    ProcessTreeDetailMonitor,
+    SysmonMonitor,
+    SecurityCorrelatorMonitor,
+    WMIEventMonitor,
+    RegistryAuditMonitor,
+    FileAuditMonitor,
+    PrivilegeUseMonitor,
+    ObjectAccessMonitor,
+    CertificateStoreMonitor,
+    AutorunMonitor,
+    PrefetchMonitor,
+    AmCacheManager,
+    WMIPersistenceMonitor,
+    BootSectorMonitor,
+    KernelCallbackMonitor,
+    ApiHookMonitor,
+    DLLInjectionMonitor
 )
 
 __all__ = [
@@ -74,6 +95,7 @@ __all__ = [
     "CleanupThread",
     "BaseMonitor",
     "SEV_NAME",
+    # Extended monitors (Group 1)
     "AdvancedThreatMonitor",
     "KernelDriverMonitor",
     "NetworkTrafficAnalysisMonitor",
@@ -96,6 +118,7 @@ __all__ = [
     "EventForwardingMonitor",
     "SecurityLoggingMonitor",
     "DefenderATPMonitor",
+    # Extended monitors (Group 2)
     "MemoryDumpMonitor",
     "ProcessInjectionMonitor",
     "NetworkSniffingMonitor",
@@ -115,5 +138,24 @@ __all__ = [
     "SignatureUpdateMonitor",
     "QuarantineMonitor",
     "BehaviorMonitoringMonitor",
-    "CloudDeliveryMonitor"
+    "CloudDeliveryMonitor",
+    # Extended monitors (Group 3)
+    "NetworkFlowMonitor",
+    "ProcessTreeDetailMonitor",
+    "SysmonMonitor",
+    "SecurityCorrelatorMonitor",
+    "WMIEventMonitor",
+    "RegistryAuditMonitor",
+    "FileAuditMonitor",
+    "PrivilegeUseMonitor",
+    "ObjectAccessMonitor",
+    "CertificateStoreMonitor",
+    "AutorunMonitor",
+    "PrefetchMonitor",
+    "AmCacheManager",
+    "WMIPersistenceMonitor",
+    "BootSectorMonitor",
+    "KernelCallbackMonitor",
+    "ApiHookMonitor",
+    "DLLInjectionMonitor"
 ]
